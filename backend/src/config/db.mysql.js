@@ -6,13 +6,7 @@ let pool = null;
 
 const connectMySQL = async () => {
   try {
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('📦 Configuration MySQL');
-    console.log('MYSQL_HOST     =', process.env.MYSQL_HOST);
-    console.log('MYSQL_PORT     =', process.env.MYSQL_PORT);
-    console.log('MYSQL_USER     =', process.env.MYSQL_USER);
-    console.log('MYSQL_DATABASE =', process.env.MYSQL_DATABASE);
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+   
 
     pool = mysql.createPool({
       host: process.env.MYSQL_HOST || 'localhost',
