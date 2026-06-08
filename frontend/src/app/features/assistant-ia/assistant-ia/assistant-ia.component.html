@@ -1,0 +1,102 @@
+<div class="chat-widget">
+  <div class="chat-window" *ngIf="isOpen">
+    <div class="chat-header">
+      <div class="header-left">
+        <div class="bot-avatar header-avatar">🤖</div>
+
+        <div>
+          <p class="bot-name">SmartDevis AI</p>
+          <p class="bot-status">
+            <span class="status-dot"></span>
+            Assistant devis intelligent
+          </p>
+        </div>
+      </div>
+
+      <button class="close-btn" type="button" (click)="toggleChat()">
+        ✕
+      </button>
+    </div>
+
+    <div class="chat-body" #scrollMe [scrollTop]="scrollMe.scrollHeight">
+      <div
+        *ngFor="let msg of chatHistory"
+        class="message-row"
+        [class.user-row]="msg.role === 'user'"
+        [class.assistant-row]="msg.role === 'assistant'"
+      >
+        <div class="avatar bot-msg-avatar" *ngIf="msg.role === 'assistant'">
+          🤖
+        </div>
+
+        <div class="message-block">
+          <div class="msg" [class.user]="msg.role === 'user'" [class.assistant]="msg.role === 'assistant'">
+            <div class="message-content">
+              {{ msg.text }}
+            </div>
+          </div>
+
+          <div class="message-time" [class.user-time]="msg.role === 'user'">
+            {{ msg.time }}
+          </div>
+        </div>
+
+        <div class="avatar user-msg-avatar" *ngIf="msg.role === 'user'">
+          👤
+        </div>
+      </div>
+
+      <div class="message-row assistant-row" *ngIf="isLoading">
+        <div class="avatar bot-msg-avatar">🤖</div>
+
+        <div class="message-block">
+          <div class="msg assistant typing">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </div>
+
+          <div class="message-time">Analyse en cours...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="quick-suggestions" *ngIf="!isLoading">
+      <button
+        type="button"
+        *ngFor="let suggestion of quickSuggestions"
+        (click)="sendSuggestion(suggestion)"
+      >
+        {{ suggestion }}
+      </button>
+    </div>
+
+    <div class="chat-footer">
+      <input
+        [(ngModel)]="userInput"
+        (keyup.enter)="sendMessage()"
+        placeholder="Posez votre question..."
+        [disabled]="isLoading"
+      />
+
+      <button
+        type="button"
+        class="send-btn"
+        (click)="sendMessage()"
+        [disabled]="isLoading || !userInput.trim()"
+      >
+        ➜
+      </button>
+    </div>
+  </div>
+
+  <button
+    class="chat-button"
+    type="button"
+    (click)="toggleChat()"
+    [class.active]="isOpen"
+  >
+    <span *ngIf="!isOpen">💬</span>
+    <span *ngIf="isOpen">✕</span>
+  </button>
+</div>

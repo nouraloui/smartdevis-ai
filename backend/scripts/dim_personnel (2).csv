@@ -1,0 +1,114 @@
+"id_personnel";"designation";"type_ressource";"unite";"appui_siege";"sous_tâches"
+"1";"Etudes routières";"Frais";"FFT";"0";
+"2";"Etudes d’ouvrages hydrauliques et d’ouvrages d’art";"Frais";"FFT";"0";
+"3";"Etudes géotechniques";"Frais";"FFT";"0";
+"4";"Ingénieur chef de mission";"Personnel";"H/m";"0";
+"5";"Ingénieur routier, adjoint au chef de mission";"Personnel";"H/m";"0";
+"6";"Ingénieur Ouvrages d'art";"Personnel";"H/m";"0";
+"7";"Expert en environnement";"Personnel";"H/m";"0";
+"8";"Ingénieur topographe";"Personnel";"H/m";"0";
+"9";"Ingénieur géotechnicien";"Personnel";"H/m";"0";
+"10";"Expert hydrologue et Hydraulicien";"Personnel";"H/m";"0";
+"11";"Expert en sécurité routière";"Personnel";"H/m";"0";
+"12";"Expert en Développement social et liaison avec les communautés";"Personnel";"H/m";"0";
+"13";"Contrôleur, surveillant des Travaux routiers 1";"Personnel";"H/m";"0";
+"14";"Contrôleur, surveillant des Travaux routiers 2";"Personnel";"H/m";"0";
+"15";"Contrôleur, surveillant des Travaux d'ouvrages hydrauliques";"Personnel";"H/m";"0";
+"16";"Contrôleur, surveillant des Travaux d'ouvrages d'art";"Personnel";"H/m";"0";
+"17";"Equipe de Brigade Topo 1";"Equipe";"Eq/m";"0";
+"18";"Equipe de Brigade Topo 2";"Equipe";"Eq/m";"0";
+"19";"Equipe de laboratoire géotechnique 1";"Equipe";"Eq/m";"0";
+"20";"Equipe de laboratoire géotechnique 2";"Equipe";"Eq/m";"0";
+"21";"Equipe de suivi environnemental";"Equipe";"Eq/m";"0";
+"22";"Appui technique siège";"Personnel";"fft";"1";
+"23";"Secrétaire";"Personnel";"FFT/Mois";"0";
+"24";"Chauffeur (08)";"Personnel";"FFT/Mois";"0";
+"25";"Achat de véhicule de type 4x4 double cabine";"Equipement";"PROV";"0";
+"26";"Frais de carburant pour les véhicules";"Equipement";"FFT/Mois";"0";
+"27";"Frais d’entretien pour les véhicules";"Equipement";"FFT/Mois";"0";
+"28";"Equipement laboratoire géotechnique";"Equipe";"FFT";"0";
+"29";"Equipements topographique";"Equipement";"FFT";"0";
+"30";"Micro-ordinateur portable";"Equipement";"FFT";"0";
+"31";"Ordinateur desktop";"Equipement";"FFT";"0";
+"32";"Imprimante laser couleur";"Equipement";"U";"0";
+"33";"Photocopieur";"Equipement";"U";"0";
+"34";"Fonctionnement de la mission de contrôle";"Frais";"FFT";"0";
+"35";"Fournitures géotechniques";"Fourniture";"FFT";"0";
+"36";"Fournitures topographiques";"Fourniture";"FFT";"0";
+"37";"Fourniture et consommables bureautiques";"Fourniture";"FFT";"0";
+"38";"Fonctionnement des bureaux de la mission de contrôle (électricité, eau, téléphone, gardiennage, ect. )";"Frais";"FFT";"0";
+"39";"Frais d’édition des rapports";"Frais";"FFT";"0";
+"40";"Frais de communication";"Frais";"FFT";"0";
+"41";"Frais de réalisation d’un film didactique";"Frais";"FFT";"0";
+"42";"Frais de logement et voyages internatiaunaux";"Frais";"FFT";"0";
+"43";"Provisions pour prise en charge des stagiaires";"Frais";"Prov";"0";
+"44";"Etudes routières";"Frais";;"0";"Revue des études APD&DAO (Ingénieur routier)+ établissement du rapport de revue"
+"45";"Etudes routières";"Frais";;"0";"Revue des études d'éxécution de l'entreprise+appui de bureau"
+"46";"Etudes d’ouvrages hydrauliques et d’ouvrages d’art";"Frais";;"0";"Hydraulicien pour la vérification de l'étude d'APD + établissement du rapport de revue"
+"47";"Etudes d’ouvrages hydrauliques et d’ouvrages d’art";"Frais";;"0";"Ingénieur OA pour la vérification de l'étude d'APD + établissement du rapport de revue"
+"48";"Etudes d’ouvrages hydrauliques et d’ouvrages d’art";"Frais";;"0";"Revue des études d'éxécution OA et hydraulique de l'entreprise+appui de bureau"
+"50";"Etudes géotechniques";"Frais";;"0";"Vérification de dimensionnement de la chaussée (Ingénieur géotechnicien)+ établissement du rapport de revue"
+"51";"Etudes géotechniques";"Frais";;"0";"Revue des études d'éxécution de l'entreprise+appui de bureau"
+"52";"Ingénieur chef de mission";"Personnel";;"0";"Salaire"
+"53";"Expert hydrologue et Hydraulicien";"Personnel";;"0";"Salaire"
+"54";"Expert en sécurité routière";"Personnel";;"0";"Salaire"
+"55";"Equipe de Brigade Topo 1";"Equipe";;"0";"1 Technicien supérieur"
+"56";"Equipe de Brigade Topo 1";"Equipe";;"0";"2 opérateurs"
+"57";"Equipe de Brigade Topo 1";"Equipe";;"0";"2 manœuvres"
+"58";"Equipe de Brigade Topo 2";"Equipe";;"0";"1 Technicien supérieur"
+"59";"Equipe de Brigade Topo 2";"Equipe";;"0";"2 opérateurs"
+"60";"Equipe de Brigade Topo 2";"Equipe";;"0";"2 manœuvres"
+"61";"Equipe de laboratoire géotechnique 1";"Equipe";;"0";"1 chef labo"
+"62";"Equipe de laboratoire géotechnique 1";"Equipe";;"0";"2 laborantins"
+"63";"Equipe de laboratoire géotechnique 1";"Equipe";;"0";"2 opérateurs"
+"64";"Equipe de laboratoire géotechnique 1";"Equipe";;"0";"2 manœuvres"
+"65";"Equipe de laboratoire géotechnique 2";"Equipe";;"0";"1 chef labo"
+"66";"Equipe de laboratoire géotechnique 2";"Equipe";;"0";"2 laborantins"
+"67";"Equipe de laboratoire géotechnique 2";"Equipe";;"0";"2 opérateurs"
+"68";"Equipe de laboratoire géotechnique 2";"Equipe";;"0";"2 manœuvres"
+"69";"Equipe de suivi environnemental";"Equipe";;"0";"trois (3) HSE d’un niveau de technicien supérieur"
+"70";"Appui technique siège";"Personnel";;"1";"Ingénieur CP pour la révue des études et validation des études d'exécution"
+"71";"Appui technique siège";"Personnel";;"1";"Expert pour écalirage public"
+"72";"Frais de carburant pour les véhicules";"Equipement";;"0";" véhicules de type 4x4 berline "
+"73";"Frais de carburant pour les véhicules";"Equipement";;"0";"véhicules de type 4x4 double cabines "
+"74";"Frais d’entretien pour les véhicules";"Equipement";;"0";"mise en état des véhicules fin du chantier"
+"75";"Frais d’entretien pour les véhicules";"Equipement";;"0";"entretien mensuel"
+"76";"Frais d’entretien pour les véhicules";"Equipement";;"0";"visite technique"
+"77";"Frais d’entretien pour les véhicules";"Equipement";;"0";"Patente et stationnement"
+"78";"Frais d’entretien pour les véhicules";"Equipement";;"0";"assurance 1 véhicule 4x4"
+"79";"Frais d’entretien pour les véhicules";"Equipement";;"0";"assurance 3 véhicules "
+"80";"Frais d’entretien pour les véhicules";"Equipement";;"0";"renouvellement assurances véhicules "
+"81";"Equipement laboratoire géotechnique";"Equipe";;"0";"Sous-traitant"
+"82";"Equipements topographique";"Equipement";;"0";"station"
+"83";"Equipements topographique";"Equipement";;"0";"niveau"
+"84";"Equipements topographique";"Equipement";;"0";"outils divers"
+"85";"Fonctionnement de la mission de contrôle";"Frais";;"0";"electricité, eau, ……. Pour logements"
+"86";"Fonctionnement de la mission de contrôle";"Frais";;"0";"connexion internet à la maison+canal"
+"87";"Fonctionnement de la mission de contrôle";"Frais";;"0";"Déplacement vers Abidjan"
+"88";"Fonctionnement de la mission de contrôle";"Frais";;"0";"Entretien maisons"
+"89";"Fonctionnement de la mission de contrôle";"Frais";;"0";"vigil pour maison CM"
+"90";"Fonctionnement de la mission de contrôle";"Frais";;"0";"Direction du projet"
+"91";"Fonctionnement de la mission de contrôle";"Frais";;"0";"Perdiems piur appuis du siège"
+"92";"Fonctionnement de la mission de contrôle";"Frais";;"0";"Mission de négociation de contrat + démarrage (2 missions pour 5 jour)"
+"93";"Fonctionnement de la mission de contrôle";"Frais";;"0";"Billet d'avion pour DP + perdiems"
+"94";"Fonctionnement de la mission de contrôle";"Frais";;"0";"4 Visite du chef de mission pendant la période de garantie (billet d'avion + logement)"
+"95";"Fourniture et consommables bureautiques";"Fourniture";;"0";"ancres"
+"96";"Fourniture et consommables bureautiques";"Fourniture";;"0";"papiers"
+"97";"Fourniture et consommables bureautiques";"Fourniture";;"0";"divers fournitures"
+"98";"Fourniture et consommables bureautiques";"Fourniture";;"0";"Toner pour photcopieuse"
+"99";"Fourniture et consommables bureautiques";"Fourniture";;"0";"achat divers"
+"100";"Fonctionnement des bureaux de la mission de contrôle (électricité, eau, téléphone, gardiennage, ect. )";"Frais";;"0";"connexion internet à la maison+canal"
+"101";"Frais d’entretien pour les véhicules";"Equipement";;"0";"Patente et stationnement"
+"102";"Fonctionnement des bureaux de la mission de contrôle (électricité, eau, téléphone, gardiennage, ect. )";"Frais";;"0";"Produit de nettoyage"
+"103";"Fonctionnement des bureaux de la mission de contrôle (électricité, eau, téléphone, gardiennage, ect. )";"Frais";;"0";"frais commerciaux pour CP"
+"104";"Frais d’édition des rapports";"Frais";;"0";"PAQ"
+"105";"Frais d’édition des rapports";"Frais";;"0";"Rapport de revue de l'APD"
+"106";"Frais d’édition des rapports";"Frais";;"0";"Rapport mensuel"
+"107";"Frais d’édition des rapports";"Frais";;"0";"Rapport trimestreil"
+"108";"Frais d’édition des rapports";"Frais";;"0";"Rapport circonstentiel"
+"109";"Frais d’édition des rapports";"Frais";;"0";"Rapport final"
+"110";"Frais de logement et voyages internatiaunaux";"Frais";;"0";"Loyer pour CM"
+"111";"Frais de logement et voyages internatiaunaux";"Frais";;"0";"Loyer pour Ingénieurs"
+"112";"Frais de logement et voyages internatiaunaux";"Frais";;"0";"Loyer pour les techniciens"
+"113";"Frais de logement et voyages internatiaunaux";"Frais";;"0";"Billet pour appuis de siège"
+"114";"Frais de logement et voyages internatiaunaux";"Frais";;"0";"Billet pour CDM"

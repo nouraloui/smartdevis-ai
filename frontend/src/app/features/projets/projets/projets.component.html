@@ -1,0 +1,317 @@
+<div class="projets-layout">
+  <aside class="projets-sidebar">
+    <h3>Projets</h3>
+
+    <button
+      type="button"
+      class="sidebar-link"
+      [class.active]="activePage === 'list'"
+      (click)="changePage('list')"
+    >
+      📁 Mes projets
+    </button>
+
+    <button
+      type="button"
+      class="sidebar-link"
+      [class.active]="activePage === 'create'"
+      (click)="changePage('create')"
+    >
+      ➕ Créer un projet
+    </button>
+  </aside>
+
+  <main class="projets-content">
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+    <p class="success" *ngIf="successMessage">{{ successMessage }}</p>
+
+    <!-- =========================
+         PAGE LISTE DES PROJETS
+    ========================== -->
+    <section *ngIf="activePage === 'list'">
+      <div class="page-header">
+        <div>
+          <h1>Mes projets</h1>
+          <p>Liste des projets existants et suivi opérationnel</p>
+        </div>
+
+        <button class="btn-add" type="button" (click)="changePage('create')">
+          + Nouveau projet
+        </button>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <span>Total projets</span>
+          <strong>{{ kpis.totalProjets || projets.length || 0 }}</strong>
+        </div>
+
+        <div class="kpi-card">
+          <span>Budget total</span>
+          <strong>{{ kpis.budgetTotal || 0 | number:'1.0-0' }} FCFA</strong>
+        </div>
+
+        <div class="kpi-card">
+          <span>Montant réalisé</span>
+          <strong>{{ kpis.realiseTotal || 0 | number:'1.0-0' }} FCFA</strong>
+        </div>
+
+        <div class="kpi-card danger">
+          <span>Projets à risque</span>
+          <strong>{{ kpis.projetsRisque || 0 }}</strong>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <input
+          type="text"
+          placeholder="Rechercher par code, département, directeur, chef projet..."
+          [(ngModel)]="search"
+          (input)="applySearch()"
+        />
+      </div>
+
+      <p *ngIf="loading">Chargement...</p>
+
+      <div class="projects-grid" *ngIf="!loading && filteredProjets.length > 0">
+        <div class="project-card" *ngFor="let p of filteredProjets">
+          <div class="project-top">
+            <div>
+              <span class="project-code">{{ p.code_projet }}</span>
+              <h3>{{ getProjectName(p) }}</h3>
+              <p>{{ p.departement || 'Département non défini' }}</p>
+            </div>
+
+            <span
+              class="risk-badge"
+              [class.risk-high]="p.risque === 'eleve'"
+              [class.risk-medium]="p.risque === 'moyen'"
+            >
+              Risque {{ getRisqueLabel(p.risque) }}
+            </span>
+          </div>
+
+          <div class="project-info">
+            <div>
+              <span>Directeur</span>
+              <strong>{{ p.directeur || '-' }}</strong>
+            </div>
+
+            <div>
+              <span>Chef projet</span>
+              <strong>{{ p.chef_projet || '-' }}</strong>
+            </div>
+
+            <div>
+              <span>Durée</span>
+              <strong>{{ p.duree_mois || 0 }} mois</strong>
+            </div>
+          </div>
+
+          <div class="budget-box">
+            <div>
+              <span>N° contrat</span>
+              <strong>{{ p.numero_contrat || '-' }}</strong>
+            </div>
+
+            <div>
+              <span>Date devis</span>
+              <strong>
+                {{ p.date_devis ? (p.date_devis | date:'dd/MM/yyyy') : '-' }}
+              </strong>
+            </div>
+          </div>
+
+          <div class="progress-section">
+            <div class="progress-label">
+              <span>Avancement</span>
+              <strong>{{ p.avancement || 0 }}%</strong>
+            </div>
+
+            <div class="progress-track">
+              <div
+                class="progress-fill"
+                [class]="getProgressClass(p.avancement || 0)"
+                [style.width.%]="p.avancement || 0"
+              ></div>
+            </div>
+          </div>
+
+          <div class="project-actions">
+            <button class="btn-devis" type="button" (click)="openProjectDevis(p)">
+              Voir les devis
+            </button>
+
+            <button class="btn-create-devis" type="button" (click)="createProjectDevis(p)">
+              + Créer des devis
+            </button>
+
+            <button class="btn-edit" type="button" (click)="editProjet(p)">
+              Modifier
+            </button>
+
+            <button class="btn-delete" type="button" (click)="deleteProjet(p._id)">
+              Supprimer
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty" *ngIf="!loading && filteredProjets.length === 0">
+        Aucun projet trouvé.
+      </div>
+    </section>
+
+    <!-- =========================
+         PAGE CREATION / MODIFICATION
+    ========================== -->
+    <section *ngIf="activePage === 'create'">
+      <div class="page-header">
+        <div>
+          <h1>{{ editMode ? 'Modifier le projet' : 'Créer un projet' }}</h1>
+          <p>Création et mise à jour des informations projet</p>
+        </div>
+
+        <button class="btn-back" type="button" (click)="changePage('list')">
+          Retour aux projets
+        </button>
+      </div>
+
+      <div class="form-card">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Code projet *</label>
+            <input
+              type="text"
+              [(ngModel)]="form.code_projet"
+              placeholder="Exemple : DI-M4"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Nom du projet</label>
+            <input
+              type="text"
+              [(ngModel)]="form.nom"
+              placeholder="Mission de contrôle DI-M4"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Client</label>
+            <input
+              type="text"
+              [(ngModel)]="form.client"
+              placeholder="Ministère des Travaux Publics"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Département</label>
+            <input
+              type="text"
+              [(ngModel)]="form.departement"
+              placeholder="DIT"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Directeur</label>
+            <input
+              type="text"
+              [(ngModel)]="form.directeur"
+              placeholder="RBI"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Chef de projet</label>
+            <input
+              type="text"
+              [(ngModel)]="form.chef_projet"
+              placeholder="IC"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Durée mois</label>
+            <input
+              type="number"
+              [(ngModel)]="form.duree_mois"
+              placeholder="24"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>N° contrat</label>
+            <input
+              type="number"
+              [(ngModel)]="form.numero_contrat"
+              placeholder="261"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Date devis</label>
+            <input type="date" [(ngModel)]="form.date_devis" />
+          </div>
+
+          <div class="form-group">
+            <label>Statut</label>
+            <select [(ngModel)]="form.statut">
+              <option value="planifie">Planifié</option>
+              <option value="en_cours">En cours</option>
+              <option value="termine">Terminé</option>
+              <option value="suspendu">Suspendu</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Date début</label>
+            <input type="date" [(ngModel)]="form.date_debut" />
+          </div>
+
+          <div class="form-group">
+            <label>Date fin</label>
+            <input type="date" [(ngModel)]="form.date_fin" />
+          </div>
+
+          <div class="form-group">
+            <label>Budget prévu FCFA</label>
+            <input type="number" [(ngModel)]="form.budget_prevu_fcfa" />
+          </div>
+
+          <div class="form-group">
+            <label>Montant réalisé FCFA</label>
+            <input type="number" [(ngModel)]="form.montant_realise_fcfa" />
+          </div>
+
+          <div class="form-group">
+            <label>Avancement (%)</label>
+            <input
+              type="number"
+              min="0"
+              max="100"
+              [(ngModel)]="form.avancement"
+            />
+          </div>
+
+          <div class="form-group full">
+            <label>Description</label>
+            <textarea rows="4" [(ngModel)]="form.description"></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-save" type="button" (click)="saveProjet()">
+            {{ editMode ? 'Enregistrer les modifications' : 'Créer le projet' }}
+          </button>
+
+          <button class="btn-cancel" type="button" (click)="changePage('list')">
+            Annuler
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>

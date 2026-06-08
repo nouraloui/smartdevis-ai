@@ -1,0 +1,245 @@
+<div class="devis-form-page">
+  <section class="page-hero">
+    <div class="hero-left">
+      <div class="hero-icon">
+        {{ isEditMode ? '✏️' : '➕' }}
+      </div>
+
+      <div>
+        <h2>
+          {{ isEditMode ? 'Modifier une ligne de devis' : 'Ajouter une ligne de devis' }}
+        </h2>
+
+        <p>
+          Saisie liée au projet :
+          <strong>
+            {{ projet?.code_projet || 'DI-M3' }}
+            —
+            {{ projet?.nom || 'Mission de contrôle DI-M3' }}
+          </strong>
+        </p>
+      </div>
+    </div>
+
+    <div class="hero-actions">
+      <button
+        type="button"
+        class="btn-back"
+        [routerLink]="projetId ? ['/projets', projetId, 'devis'] : ['/projets']"
+      >
+        ← Retour aux devis
+      </button>
+    </div>
+  </section>
+
+  <section class="project-context-card">
+    <div class="project-context-header">
+      <div>
+        <span class="context-label">Projet lié</span>
+        <h3>{{ projet?.nom || 'Mission de contrôle DI-M3' }}</h3>
+      </div>
+
+      <span class="project-pill">
+        {{ projet?.code_projet || 'DI-M3' }}
+      </span>
+    </div>
+
+    <div class="project-context-grid">
+      <div class="context-item">
+        <span>Code projet</span>
+        <strong>{{ projet?.code_projet || 'DI-M3' }}</strong>
+      </div>
+
+      <div class="context-item">
+        <span>Nom du projet</span>
+        <strong>{{ projet?.nom || 'Mission de contrôle DI-M3' }}</strong>
+      </div>
+
+      <div class="context-item">
+        <span>Client</span>
+        <strong>{{ projet?.client || '-' }}</strong>
+      </div>
+
+      <div class="context-item">
+        <span>Département</span>
+        <strong>{{ projet?.departement || 'DIT' }}</strong>
+      </div>
+    </div>
+  </section>
+
+  <section class="form-card">
+    <div class="form-card-header">
+      <div>
+        <h3>Informations de la ligne</h3>
+        <p>Renseignez les données techniques et financières du devis.</p>
+      </div>
+
+      <span class="form-mode-badge" [class.edit]="isEditMode">
+        {{ isEditMode ? 'Mode modification' : 'Nouvelle ligne' }}
+      </span>
+    </div>
+
+    <form [formGroup]="devisForm" (ngSubmit)="onSubmit()">
+      <div class="form-section">
+        <div class="section-title">
+          <span>01</span>
+          <h4>Identification</h4>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Section</label>
+            <select formControlName="section">
+              <option value="A">Section A</option>
+              <option value="B">Section B</option>
+              <option value="C">Section C</option>
+              <option value="D">Section D</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Désignation</label>
+            <input
+              type="text"
+              formControlName="designation"
+              placeholder="Exemple : MISSION DES VISAS DES ETUDES D'EXECUTION"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Catégorie</label>
+            <input
+              type="text"
+              formControlName="categorie"
+              placeholder="Exemple : Études routières"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Sous-catégorie</label>
+            <input
+              type="text"
+              formControlName="sousCategorie"
+              placeholder="Exemple : Revue des études APD&DAO"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Unité</label>
+            <input
+              type="text"
+              formControlName="unite"
+              placeholder="Exemple : FFT, H/m, mois..."
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Statut</label>
+            <select formControlName="statut">
+              <option value="brouillon">Brouillon</option>
+              <option value="valide">Validé</option>
+              <option value="archive">Archivé</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-title">
+          <span>02</span>
+          <h4>Données contrat</h4>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Quantité contrat</label>
+            <input
+              type="number"
+              formControlName="quantite"
+              placeholder="Exemple : 1"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>PU contrat arrondi FCFA</label>
+            <input
+              type="number"
+              formControlName="puContratFcfaArrondi"
+              placeholder="Exemple : 13284000"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>PU contrat exact FCFA</label>
+            <input
+              type="number"
+              formControlName="puContratFcfaExact"
+              placeholder="Exemple : 13283129.25"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-title">
+          <span>03</span>
+          <h4>Prix de revient</h4>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Quantité site</label>
+            <input
+              type="number"
+              formControlName="quantiteSite"
+              placeholder="Exemple : 1"
+            />
+          </div>
+
+          <div class="form-group">
+  <label>Prix Euro</label>
+  <input
+    type="number"
+    formControlName="prixRevientEur"
+    placeholder="Exemple : 15000"
+  />
+</div>
+
+          <div class="form-group">
+            <label>Taux FG (%)</label>
+            <input
+              type="number"
+              formControlName="tauxFg"
+              placeholder="Exemple : 5"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="error-card" *ngIf="errorMessage">
+        <span>⚠️</span>
+        <p>{{ errorMessage }}</p>
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn-cancel"
+          [routerLink]="projetId ? ['/projets', projetId, 'devis'] : ['/projets']"
+        >
+          Annuler
+        </button>
+
+        <button type="submit" class="btn-submit" [disabled]="loading">
+          <span *ngIf="!loading">
+            {{ isEditMode ? 'Modifier la ligne' : 'Enregistrer la ligne' }}
+          </span>
+
+          <span *ngIf="loading">
+            Enregistrement...
+          </span>
+        </button>
+      </div>
+    </form>
+  </section>
+</div>

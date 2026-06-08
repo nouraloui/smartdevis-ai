@@ -1,0 +1,290 @@
+<div class="devis-page">
+  <div class="page-hero">
+    <div class="hero-left">
+      <div class="hero-icon">📄</div>
+
+      <div>
+        <h2>{{ projetId ? 'Devis du projet' : 'Liste des devis' }}</h2>
+
+        <p *ngIf="!projetId">
+          Gestion des lignes de devis techniques et financiers
+        </p>
+
+        <p *ngIf="projetId">
+          {{ getProjectLabel() }}
+        </p>
+      </div>
+    </div>
+
+    <div class="hero-actions">
+      <button
+        *ngIf="projetId"
+        class="btn-back"
+        type="button"
+        (click)="goBackToProjects()"
+      >
+        ← Retour aux projets
+      </button>
+
+      <button class="btn-add" type="button" (click)="goToCreate()">
+        + Ajouter une ligne
+      </button>
+    </div>
+  </div>
+
+  <div class="project-context-card" *ngIf="projetId && projet">
+    <div class="project-context-header">
+      <div>
+        <span class="context-label">Projet actif</span>
+        <h3>{{ projet.nom || 'Projet sans nom' }}</h3>
+      </div>
+
+      <span class="project-pill">
+        {{ projet.code_projet || '-' }}
+      </span>
+    </div>
+
+    <div class="project-context-grid">
+      <div class="context-item">
+        <span>Code projet</span>
+        <strong>{{ projet.code_projet || '-' }}</strong>
+      </div>
+
+      <div class="context-item">
+        <span>Client</span>
+        <strong>{{ projet.client || '-' }}</strong>
+      </div>
+
+      <div class="context-item">
+        <span>Département</span>
+        <strong>{{ projet.departement || '-' }}</strong>
+      </div>
+
+      <div class="context-item">
+        <span>Chef de projet</span>
+        <strong>{{ projet.chef_projet || '-' }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="filters-card">
+    <div class="filter-group">
+      <label>Recherche</label>
+
+      <div class="search-box">
+        <span>🔎</span>
+        <input
+          type="text"
+          placeholder="Rechercher par section, désignation, catégorie..."
+          [(ngModel)]="search"
+          (input)="applyFilters()"
+        />
+      </div>
+    </div>
+
+    <button class="btn-reset" type="button" (click)="resetFilters()">
+      Réinitialiser
+    </button>
+  </div>
+
+  <p class="loading" *ngIf="loading">Chargement des devis...</p>
+  <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+  <div class="table-card" *ngIf="!loading && filteredDevis.length > 0">
+    <div class="table-header">
+      <div>
+        <h3>Lignes de devis</h3>
+        <p>{{ filteredDevis.length }} ligne(s) trouvée(s)</p>
+      </div>
+    </div>
+
+    <div class="table-scroll">
+      <table class="devis-table">
+        <thead>
+          <tr>
+            <th rowspan="2">Section</th>
+            <th rowspan="2">Désignation</th>
+            <th rowspan="2">Catégorie</th>
+            <th rowspan="2">Sous-catégorie</th>
+            <th rowspan="2">Unité</th>
+            <th rowspan="2">Quantité</th>
+
+            <th colspan="2">Contrat</th>
+            <th colspan="2">Montant</th>
+            <th colspan="3">Prix de revient</th>
+
+            <th rowspan="2">Marge brute</th>
+            <th colspan="2">Frais de gestion</th>
+            <th colspan="2">Marge nette</th>
+            <th rowspan="2">Statut</th>
+            <th rowspan="2">Actions</th>
+          </tr>
+
+          <tr>
+            <th>PU arrondi FCFA</th>
+            <th>PU exact FCFA</th>
+
+            <th>FCFA</th>
+            <th>EUR</th>
+
+            <th>Qté site</th>
+            <th>PU site EUR</th>
+            <th>Prix Euro</th>
+
+            <th>Euro</th>
+            <th>%</th>
+
+            <th>Euro</th>
+            <th>%</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr
+            *ngFor="let d of filteredDevis"
+            [class.parent-row]="d.ligneType === 'categorie'"
+            [class.child-row]="d.ligneType === 'sous_categorie'"
+          >
+            <td>{{ d.section || '-' }}</td>
+
+            <td class="text-col">
+              {{ d.designation || '-' }}
+            </td>
+
+            <td class="text-col">
+              <strong *ngIf="d.ligneType === 'categorie'">
+                {{ d.categorie || '-' }}
+              </strong>
+
+              <span *ngIf="d.ligneType !== 'categorie'">
+                {{ d.categorie || '-' }}
+              </span>
+            </td>
+
+            <td class="text-col large">
+              <span
+                *ngIf="d.ligneType === 'sous_categorie'"
+                class="sub-indent"
+              >
+                {{ d.sousCategorie || '-' }}
+              </span>
+
+              <span *ngIf="d.ligneType !== 'sous_categorie'">
+                {{ d.sousCategorie || '-' }}
+              </span>
+            </td>
+
+            <td>{{ d.unite || '-' }}</td>
+
+            <td>
+              <ng-container *ngIf="d.ligneType !== 'sous_categorie'; else emptyCell">
+                {{ d.quantite || 0 }}
+              </ng-container>
+            </td>
+
+            <td>
+              <ng-container *ngIf="d.ligneType !== 'sous_categorie'; else emptyCell">
+                {{ d.puContratFcfaArrondi || 0 | number:'1.0-0' }}
+              </ng-container>
+            </td>
+
+            <td>
+              <ng-container *ngIf="d.ligneType !== 'sous_categorie'; else emptyCell">
+                {{ d.puContratFcfaExact || 0 | number:'1.0-2' }}
+              </ng-container>
+            </td>
+
+            <td>
+              <ng-container *ngIf="d.ligneType !== 'sous_categorie'; else emptyCell">
+                {{ d.montantFcfa || 0 | number:'1.0-0' }}
+              </ng-container>
+            </td>
+
+            <td>
+              <ng-container *ngIf="d.ligneType !== 'sous_categorie'; else emptyCell">
+                {{ d.montantEur || 0 | number:'1.0-2' }}
+              </ng-container>
+            </td>
+
+            <td>{{ d.quantiteSite || 0 }}</td>
+            <td>{{ d.puSiteEur || 0 | number:'1.0-0' }}</td>
+            <td>{{ d.prixRevientEur || 0 | number:'1.0-0' }}</td>
+
+            <td>
+              <ng-container *ngIf="d.ligneType !== 'sous_categorie'; else emptyCell">
+                {{ d.margeBruteEur || 0 | number:'1.0-0' }}
+              </ng-container>
+            </td>
+
+            <td>
+              <ng-container *ngIf="d.ligneType !== 'sous_categorie'; else emptyCell">
+                {{ d.fraisGestionEur || 0 | number:'1.0-0' }}
+              </ng-container>
+            </td>
+
+            <td>
+              <ng-container *ngIf="d.ligneType !== 'sous_categorie'; else emptyCell">
+                {{ d.tauxFg || 0 | percent:'1.0-1' }}
+              </ng-container>
+            </td>
+
+            <td>
+              <ng-container *ngIf="d.ligneType !== 'sous_categorie'; else emptyCell">
+                {{ d.margeNetteEur || 0 | number:'1.0-0' }}
+              </ng-container>
+            </td>
+
+            <td>
+              <ng-container *ngIf="d.ligneType !== 'sous_categorie'; else emptyCell">
+                <span
+                  class="badge"
+                  [class.badge-positive]="(d.margeNettePct || 0) >= 0"
+                  [class.badge-negative]="(d.margeNettePct || 0) < 0"
+                >
+                  {{ d.margeNettePct || 0 | number:'1.0-2' }}%
+                </span>
+              </ng-container>
+            </td>
+
+            <td>
+              <span class="status">{{ d.statut }}</span>
+            </td>
+
+            <td class="actions-cell">
+              <button class="btn-edit" type="button" (click)="goToEdit(d._id)">
+                Modifier
+              </button>
+
+              <button class="btn-delete" type="button" (click)="delete(d._id)">
+                Supprimer
+              </button>
+            </td>
+          </tr>
+
+          <ng-template #emptyCell>
+            <span></span>
+          </ng-template>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && filteredDevis.length === 0">
+    <div class="empty-icon">📋</div>
+
+    <h3>Aucun devis trouvé</h3>
+
+    <p *ngIf="projetId">
+      Ce projet ne contient pas encore de lignes de devis.
+      Ajoutez une première ligne pour commencer le suivi financier.
+    </p>
+
+    <p *ngIf="!projetId">
+      Aucun devis ne correspond à votre recherche.
+    </p>
+
+    <button class="btn-add empty-btn" type="button" (click)="goToCreate()">
+      + Ajouter une ligne de devis
+    </button>
+  </div>
+</div>

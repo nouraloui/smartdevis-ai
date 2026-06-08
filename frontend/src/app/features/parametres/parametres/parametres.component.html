@@ -1,0 +1,236 @@
+<section class="settings-page">
+  <div class="page-header">
+    <div>
+      <h1>Paramètres</h1>
+      <p>
+        Configurez les règles générales de SmartDevis AI, les informations entreprise,
+        la sécurité et les paramètres d’analyse.
+      </p>
+    </div>
+  </div>
+
+  <div class="settings-grid">
+    <article class="setting-card" *ngFor="let card of cards">
+      <div class="card-top">
+        <div class="icon-box">
+          <i [class]="card.icon"></i>
+        </div>
+        <span class="badge">{{ card.badge }}</span>
+      </div>
+
+      <h2>{{ card.title }}</h2>
+      <p>{{ card.description }}</p>
+
+      <button type="button" (click)="selectSection(card.section)">
+        Configurer
+        <i class="pi pi-arrow-right"></i>
+      </button>
+    </article>
+  </div>
+
+  <div class="settings-content" id="settings-content" *ngIf="selectedSection">
+    <div class="content-header">
+      <div>
+        <h2 *ngIf="selectedSection === 'profil'">Profil utilisateur</h2>
+        <h2 *ngIf="selectedSection === 'entreprise'">Informations entreprise</h2>
+        <h2 *ngIf="selectedSection === 'devis'">Configuration des devis</h2>
+        <h2 *ngIf="selectedSection === 'ia'">Analyse intelligente</h2>
+        <h2 *ngIf="selectedSection === 'securite'">Sécurité et accès</h2>
+        <h2 *ngIf="selectedSection === 'exports'">Exports et documents</h2>
+        <p>Modifiez les paramètres puis cliquez sur sauvegarder.</p>
+      </div>
+
+      <button class="close-btn" type="button" (click)="closeSection()">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+
+    <!-- ================= PROFIL UTILISATEUR ================= -->
+    <form class="settings-form" *ngIf="selectedSection === 'profil'">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nom complet</label>
+          <input type="text" [value]="currentUser?.nom || ''" readonly />
+        </div>
+
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" [value]="currentUser?.email || ''" readonly />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Rôle</label>
+          <input
+            type="text"
+            [value]="
+              currentUser?.role === 'admin'
+                ? 'Administrateur'
+                : currentUser?.role === 'manager'
+                ? 'Manager'
+                : 'Consultant'
+            "
+            readonly
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Préférence de langue</label>
+          <select>
+            <option>Français</option>
+            <option>Anglais</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="save-btn" type="button" (click)="saveSettings()">
+        Sauvegarder
+      </button>
+    </form>
+
+    <!-- ================= ENTREPRISE ================= -->
+    <form class="settings-form" *ngIf="selectedSection === 'entreprise'">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nom entreprise</label>
+          <input type="text" value="Africa Engineering" />
+        </div>
+
+        <div class="form-group">
+          <label>Email entreprise</label>
+          <input type="email" placeholder="contact@africa-engineering.com" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Téléphone</label>
+          <input type="text" placeholder="+216 ..." />
+        </div>
+
+        <div class="form-group">
+          <label>Adresse</label>
+          <input type="text" placeholder="Lac 2, Tunis" />
+        </div>
+      </div>
+
+      <button class="save-btn" type="button" (click)="saveSettings()">Sauvegarder</button>
+    </form>
+
+    <!-- ================= DEVIS ================= -->
+    <form class="settings-form" *ngIf="selectedSection === 'devis'">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Taux frais de gestion (%)</label>
+          <input type="number" value="10" />
+        </div>
+
+        <div class="form-group">
+          <label>Taux EUR / FCFA</label>
+          <input type="number" value="655.957" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Devise principale</label>
+          <select>
+            <option>FCFA</option>
+            <option>EUR</option>
+            <option>TND</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Méthode d’arrondi</label>
+          <select>
+            <option>Arrondi standard</option>
+            <option>Arrondi supérieur</option>
+            <option>Sans arrondi</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="save-btn" type="button" (click)="saveSettings()">Sauvegarder</button>
+    </form>
+
+    <!-- ================= IA ================= -->
+    <form class="settings-form" *ngIf="selectedSection === 'ia'">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Seuil anomalie coût (%)</label>
+          <input type="number" value="20" />
+        </div>
+
+        <div class="form-group">
+          <label>Sensibilité IA</label>
+          <select>
+            <option>Faible</option>
+            <option selected>Moyenne</option>
+            <option>Élevée</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="switch-line">
+        <span>Activer la détection d’anomalies</span>
+        <input type="checkbox" checked />
+      </div>
+
+      <div class="switch-line">
+        <span>Activer les suggestions automatiques de prix</span>
+        <input type="checkbox" checked />
+      </div>
+
+      <button class="save-btn" type="button" (click)="saveSettings()">Sauvegarder</button>
+    </form>
+
+    <!-- ================= SECURITE ================= -->
+    <form class="settings-form" *ngIf="selectedSection === 'securite'">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Ancien mot de passe</label>
+          <input type="password" />
+        </div>
+
+        <div class="form-group">
+          <label>Nouveau mot de passe</label>
+          <input type="password" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Expiration session</label>
+        <select>
+          <option>30 minutes</option>
+          <option>1 heure</option>
+          <option>24 heures</option>
+        </select>
+      </div>
+
+      <button class="save-btn" type="button" (click)="saveSettings()">Sauvegarder</button>
+    </form>
+
+    <!-- ================= EXPORTS ================= -->
+    <form class="settings-form" *ngIf="selectedSection === 'exports'">
+      <div class="switch-line">
+        <span>Afficher le logo dans les PDF</span>
+        <input type="checkbox" checked />
+      </div>
+
+      <div class="switch-line">
+        <span>Afficher les détails par étape</span>
+        <input type="checkbox" checked />
+      </div>
+
+      <div class="switch-line">
+        <span>Activer export Excel</span>
+        <input type="checkbox" checked />
+      </div>
+
+      <button class="save-btn" type="button" (click)="saveSettings()">Sauvegarder</button>
+    </form>
+
+  </div>
+</section>

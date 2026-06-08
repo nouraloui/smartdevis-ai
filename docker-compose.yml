@@ -1,0 +1,82 @@
+services:
+  mongodb:
+    image: mongo:7
+    container_name: smartdevis_mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - smartdevis_net
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: smartdevis_n8n
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      N8N_HOST: localhost
+      N8N_PORT: 5678
+      N8N_PROTOCOL: http
+      NODE_ENV: development
+      WEBHOOK_URL: http://localhost:5678/
+      GENERIC_TIMEZONE: Africa/Tunis
+      N8N_SECURE_COOKIE: "false"
+    networks:
+      smartdevis_net:
+        aliases:
+          - n8n
+          - smartdevis_n8n
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+  backend:
+    build: ./backend
+    container_name: smartdevis_backend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      NODE_ENV: development
+      MONGO_URI: mongodb://mongodb:27017/smartdevis_ai
+      JWT_SECRET: smartdevis_secret
+      FRONTEND_URL: http://localhost:4200
+
+      N8N_WEBHOOK_URL: http://n8n:5678/webhook/devis-agent
+
+      MYSQL_HOST: 172.23.128.1
+      MYSQL_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      MYSQL_DATABASE: africa-engineering_di
+
+      IA_SERVICE_URL: http://host.docker.internal:8000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - mongodb
+      - n8n
+    networks:
+      - smartdevis_net
+
+  frontend:
+    build: ./frontend
+    container_name: smartdevis_frontend
+    restart: always
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+    networks:
+      - smartdevis_net
+
+volumes:
+  mongo_data:
+  n8n_data:
+
+networks:
+  smartdevis_net:
+    driver: bridge

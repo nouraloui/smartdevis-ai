@@ -1,0 +1,76 @@
+<div class="login-page">
+  <div class="login-card">
+    <img
+      src="assets/logo_africa_engineering.jpg"
+      alt="Logo Africa Engineering"
+      class="login-logo"
+    />
+
+    <h2>Connexion</h2>
+    <p class="subtitle">Connectez-vous à votre compte SmartDevis AI</p>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label>Email</label>
+        <input
+          type="email"
+          formControlName="email"
+          placeholder="Votre email"
+        />
+
+        <small
+          class="field-error"
+          *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.invalid"
+        >
+          Email invalide.
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label>Mot de passe</label>
+        <input
+          type="password"
+          formControlName="password"
+          placeholder="Votre mot de passe"
+        />
+
+        <small
+          class="field-error"
+          *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.invalid"
+        >
+          Le mot de passe doit contenir au moins 6 caractères.
+        </small>
+      </div>
+
+      <div class="login-options">
+        <label class="remember-me">
+          <input type="checkbox" formControlName="rememberMe" />
+          <span>Remember me</span>
+        </label>
+
+        <button
+          type="button"
+          class="forgot-link"
+          (click)="onForgotPassword()"
+          [disabled]="forgotLoading"
+        >
+          {{ forgotLoading ? 'Envoi...' : 'Mot de passe oublié ?' }}
+        </button>
+      </div>
+
+      <button class="btn-primary" type="submit" [disabled]="loading">
+        {{ loading ? 'Connexion...' : 'Se connecter' }}
+      </button>
+
+      <button class="btn-secondary" type="button" routerLink="/register">
+        Créer un compte
+      </button>
+    </form>
+
+    <p class="error" *ngIf="loginErrorMessage">{{ loginErrorMessage }}</p>
+    <p class="error" *ngIf="forgotPasswordError">{{ forgotPasswordError }}</p>
+    <p class="success" *ngIf="forgotPasswordSuccess">
+      {{ forgotPasswordSuccess }}
+    </p>
+  </div>
+</div>

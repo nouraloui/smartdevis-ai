@@ -1,0 +1,225 @@
+<div class="ia-page">
+  <div class="page-header">
+    <h2>Analyse IA</h2>
+    <p>Détection d’anomalies, score de risque et suggestion intelligente des valeurs</p>
+  </div>
+
+  <div class="ia-card">
+    <h3>Données du devis</h3>
+    <p class="card-description">
+      Saisissez les informations principales pour analyser le devis avec les modules IA.
+    </p>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Projet / Dataset</label>
+        <select [(ngModel)]="codeProjet">
+          <option *ngFor="let p of projets" [value]="p.value">
+            {{ p.label }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>PU FCFA</label>
+        <input type="number" [(ngModel)]="puFcfa" placeholder="Exemple : 13284000" />
+      </div>
+
+      <div class="form-group">
+        <label>Quantité</label>
+        <input type="number" [(ngModel)]="quantite" placeholder="Exemple : 1" />
+      </div>
+
+      <div class="form-group">
+        <label>Prix de revient FCFA</label>
+        <input type="number" [(ngModel)]="prixRevientFcfa" placeholder="Exemple : 12000000" />
+      </div>
+
+      <div class="form-group">
+        <label>Frais de gestion (%)</label>
+        <input type="number" [(ngModel)]="fraisGestionPct" placeholder="Exemple : 5" />
+      </div>
+
+      <div class="form-group">
+        <label>Marge nette (%)</label>
+        <input type="number" [(ngModel)]="margeNettePct" placeholder="Exemple : 12" />
+      </div>
+
+      <div class="form-group">
+        <label>Code catégorie</label>
+        <input type="number" [(ngModel)]="categorieCode" placeholder="Exemple : 1" />
+      </div>
+    </div>
+
+    <div class="montant-preview" *ngIf="puFcfa && quantite">
+      Montant calculé :
+      <strong>{{ montantFcfa | number:'1.0-0' }} FCFA</strong>
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" type="button" (click)="detectAnomaly()" [disabled]="loadingAnomaly">
+        {{ loadingAnomaly ? 'Analyse...' : 'Détecter anomalie' }}
+      </button>
+
+      <button class="btn-risk" type="button" (click)="calculateRiskScore()" [disabled]="loadingRisk">
+        {{ loadingRisk ? 'Calcul...' : 'Calculer score de risque' }}
+      </button>
+
+      <button class="btn-suggestion" type="button" (click)="suggestValues()" [disabled]="loadingSuggestion">
+        {{ loadingSuggestion ? 'Suggestion...' : 'Suggérer valeurs IA' }}
+      </button>
+
+      <button class="btn-margin" type="button" (click)="predictMargin()" [disabled]="loadingMargin">
+        {{ loadingMargin ? 'Prédiction...' : 'Prédire marge' }}
+      </button>
+
+      <button class="btn-reset" type="button" (click)="reset()">
+        Réinitialiser
+      </button>
+    </div>
+
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+  </div>
+
+  <div
+    class="result-card"
+    *ngIf="anomalyResult"
+    [class.alert-danger]="anomalyResult.anomalie"
+    [class.alert-success]="!anomalyResult.anomalie"
+  >
+    <div class="result-icon">
+      {{ anomalyResult.anomalie ? '⚠️' : '✅' }}
+    </div>
+
+    <div>
+      <h3>{{ anomalyResult.anomalie ? 'Anomalie détectée' : 'Prix normal' }}</h3>
+      <p>{{ anomalyResult.message }}</p>
+      <small>Score IA : {{ anomalyResult.score | number:'1.4-4' }}</small>
+    </div>
+  </div>
+
+  <div
+    class="risk-card"
+    *ngIf="riskResult"
+    [class.risk-low]="riskResult.niveau === 'Faible'"
+    [class.risk-medium]="riskResult.niveau === 'Moyen'"
+    [class.risk-high]="riskResult.niveau === 'Élevé'"
+  >
+    <div class="risk-header">
+      <div>
+        <h3>Score de risque du devis</h3>
+        <p>Décision IA : {{ riskResult.decision }}</p>
+      </div>
+
+      <div class="score-circle">
+        {{ riskResult.score }}/100
+      </div>
+    </div>
+
+    <div class="risk-level">
+      Niveau de risque :
+      <strong>{{ riskResult.niveau }}</strong>
+    </div>
+
+    <div class="risk-section">
+      <h4>Causes détectées</h4>
+      <ul>
+        <li *ngFor="let cause of riskResult.causes">{{ cause }}</li>
+      </ul>
+    </div>
+
+    <div class="risk-section">
+      <h4>Recommandations</h4>
+      <ul>
+        <li *ngFor="let recommandation of riskResult.recommandations">
+          {{ recommandation }}
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="suggestion-card" *ngIf="suggestionResult">
+    <div class="suggestion-header">
+      <div>
+        <h3>Suggestion IA de valeurs</h3>
+        <p>{{ suggestionResult.message }}</p>
+      </div>
+
+      <div class="suggestion-badge">Random Forest</div>
+    </div>
+
+    <div class="suggestion-grid">
+      <div class="suggestion-item">
+        <span>PU optimal</span>
+        <strong>{{ suggestionResult.pu_optimal_fcfa | number:'1.0-0' }} FCFA</strong>
+      </div>
+
+      <div class="suggestion-item">
+        <span>Marge probable</span>
+        <strong>{{ suggestionResult.marge_probable_pct }} %</strong>
+      </div>
+
+      <div class="suggestion-item">
+        <span>FG recommandé</span>
+        <strong>{{ suggestionResult.fg_recommande_pct }} %</strong>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="margin-card"
+    *ngIf="marginResult"
+    [class.margin-bad]="marginResult.niveau === 'Déficitaire' || marginResult.niveau === 'Faible'"
+    [class.margin-ok]="marginResult.niveau === 'Acceptable'"
+    [class.margin-good]="marginResult.niveau === 'Bonne'"
+  >
+    <div class="margin-header">
+      <div>
+        <h3>Prédiction IA de marge nette</h3>
+        <p>{{ marginResult.message }}</p>
+      </div>
+
+      <div class="confidence-circle">
+        {{
+          marginResult.score_confiance ??
+          marginResult.score_confiance_pct ??
+          marginResult.confidence ??
+          marginResult.confidence_score ??
+          0
+        }}%
+      </div>
+    </div>
+
+    <div class="margin-grid">
+      <div class="margin-item">
+        <span>Marge nette prédite</span>
+        <strong>{{ marginResult.marge_predite_pct }} %</strong>
+      </div>
+
+      <div class="margin-item">
+        <span>Niveau</span>
+        <strong>{{ marginResult.niveau }}</strong>
+      </div>
+
+      <div class="margin-item">
+        <span>Décision IA</span>
+        <strong>{{ marginResult.decision }}</strong>
+      </div>
+    </div>
+
+    <div class="confidence-bar">
+      <div
+        class="confidence-fill"
+        [style.width.%]="
+          marginResult.score_confiance ??
+          marginResult.score_confiance_pct ??
+          marginResult.confidence ??
+          marginResult.confidence_score ??
+          0
+        "
+      ></div>
+    </div>
+
+    <small>Score de confiance du modèle XGBoost</small>
+  </div>
+</div>

@@ -1,0 +1,101 @@
+<div class="agent-page">
+
+  <div class="agent-header">
+    <div>
+      <h1>Assistant IA SmartDevis</h1>
+    </div>
+
+    <div class="status" [class.online]="agentOnline" [class.offline]="!agentOnline">
+      <span class="dot"></span>
+      {{ agentOnline ? 'Agent connecté' : 'Agent non connecté' }}
+    </div>
+  </div>
+
+  <div class="agent-layout">
+
+    <aside class="suggestions-card">
+      <h3>Questions rapides</h3>
+
+      <button
+        *ngFor="let suggestion of suggestions"
+        type="button"
+        (click)="sendSuggestion(suggestion)">
+        {{ suggestion }}
+      </button>
+
+      <button type="button" class="clear-btn" (click)="clearChat()">
+        Réinitialiser
+      </button>
+    </aside>
+
+    <section class="chat-card">
+
+      <div class="chat-header">
+        <div>
+          <h2>DevisAssistant</h2>
+        </div>
+      </div>
+
+      <div class="error-box" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <div class="chat-messages">
+
+        <div
+          *ngFor="let msg of messages"
+          class="message-row"
+          [class.user-row]="msg.sender === 'user'"
+          [class.agent-row]="msg.sender === 'agent'">
+
+          <div class="message-bubble">
+            <div class="message-author">
+              {{ msg.sender === 'user' ? 'Vous' : 'SmartDevis AI' }}
+            </div>
+
+            <div class="message-text">
+              {{ msg.text }}
+            </div>
+
+            <div class="message-time">
+              {{ msg.time | date:'HH:mm' }}
+            </div>
+          </div>
+
+        </div>
+
+        <div class="message-row agent-row" *ngIf="loading">
+          <div class="message-bubble loading-bubble">
+            <div class="message-author">SmartDevis AI</div>
+            <div class="typing">
+              Analyse en cours
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="chat-input">
+        <input
+          type="text"
+          [(ngModel)]="userMessage"
+          placeholder="Posez une question sur les devis..."
+          (keyup.enter)="sendMessage()"
+          [disabled]="loading">
+
+        <button
+          type="button"
+          (click)="sendMessage()"
+          [disabled]="loading || !userMessage.trim()">
+          {{ loading ? 'Analyse...' : 'Envoyer' }}
+        </button>
+      </div>
+
+    </section>
+
+  </div>
+
+</div>

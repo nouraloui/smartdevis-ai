@@ -1,0 +1,560 @@
+<div class="dashboard-layout">
+  <aside class="dashboard-sidebar">
+    <div class="sidebar-title">
+      <h3>Dashboard</h3>
+      <p>Analyse décisionnelle</p>
+    </div>
+
+    <button
+  class="sidebar-item"
+  type="button"
+  *ngFor="let page of visiblePages"
+  [class.active]="activePage === page.key"
+  (click)="setActivePage(page.key)"
+>
+  <span class="sidebar-icon">{{ page.icon }}</span>
+
+  <span>
+    <strong>{{ page.title }}</strong>
+    <small>{{ page.description }}</small>
+  </span>
+</button>
+
+    <div class="sidebar-summary">
+      <span>Projet actif</span>
+      <strong>{{ codeProjet }}</strong>
+      <small>Score santé : {{ getHealthScore() }} / 100</small>
+    </div>
+  </aside>
+
+  <main class="dashboard-page">
+    <div class="page-header">
+      <div>
+        <h1>Dashboard analytique</h1>
+        <p>
+          Données affichées pour le projet :
+          <strong>{{ codeProjet }}</strong>
+        </p>
+      </div>
+
+      <div class="header-actions">
+        <div class="project-filter">
+          <label>Projet</label>
+
+          <select [(ngModel)]="codeProjet" (change)="onProjetChange()">
+            <option *ngFor="let p of projets" [value]="p.value">
+              {{ p.label }}
+            </option>
+          </select>
+        </div>
+
+        <button class="refresh-btn" type="button" (click)="loadDashboard()">
+          Actualiser
+        </button>
+
+        <button class="pdf-btn" type="button" (click)="exportPDF()">
+          Export PDF
+        </button>
+      </div>
+    </div>
+
+    <p *ngIf="loading">Chargement...</p>
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+    <div id="dashboard-content" *ngIf="!loading">
+      <!-- ================= PAGE 1 : VUE GLOBALE ================= -->
+      <section *ngIf="activePage === 'global'">
+        <div class="section-header">
+          <h2>Vue globale du projet {{ codeProjet }}</h2>
+          <p>Indicateurs principaux, santé du projet et vision synthétique.</p>
+        </div>
+
+        <div class="executive-grid">
+          <div class="score-card">
+            <div class="score-circle">
+              <span>{{ getHealthScore() }}</span>
+            </div>
+
+            <div>
+              <h3>Score santé du projet</h3>
+              <p>{{ getRentabilityStatus() }} — risque {{ getRiskLevel() }}</p>
+            </div>
+          </div>
+
+          <div class="mini-card">
+            <span>Taux anomalies</span>
+            <strong>{{ getAnomalyRate() }} %</strong>
+            <div class="mini-progress">
+              <div [style.width.%]="getAnomalyRate()"></div>
+            </div>
+          </div>
+
+          <div class="mini-card">
+            <span>Évolution vs historique</span>
+            <strong [class]="getEvolutionGlobale() >= 0 ? 'success-text' : 'danger-text'">
+              {{ getEvolutionGlobale() | number:'1.0-2' }} %
+            </strong>
+            <p>Comparaison globale du montant actuel.</p>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <span>Montant total</span>
+            <strong>{{ kpis.montantTotalFcfa || 0 | number:'1.0-0' }} FCFA</strong>
+          </div>
+
+          <div class="kpi-card">
+            <span>Marge moyenne</span>
+            <strong [class]="getMargeClass(kpis.margeNetteMoyenne || 0)">
+              {{ kpis.margeNetteMoyenne || 0 | number:'1.0-2' }} %
+            </strong>
+          </div>
+
+          <div class="kpi-card danger">
+            <span>Anomalies détectées</span>
+            <strong>{{ kpis.nombreAnomalies || 0 }}</strong>
+          </div>
+
+          <div class="kpi-card">
+            <span>Lignes de devis</span>
+            <strong>{{ kpis.totalLignes || 0 }}</strong>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-card">
+            <h3>Radar de performance</h3>
+            <p>Vision multicritère du projet.</p>
+
+            <div class="chart-box">
+              <canvas baseChart [data]="radarChartData" [options]="chartOptions" type="radar"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <h3>Répartition financière</h3>
+            <p>Distribution du montant par section.</p>
+
+            <div class="chart-box">
+              <canvas baseChart [data]="pieChartData" [options]="chartOptions" type="doughnut"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= PAGE 2 : PERFORMANCE FINANCIÈRE ================= -->
+      <section *ngIf="activePage === 'finance'">
+        <div class="section-header">
+          <h2>Performance financière — {{ codeProjet }}</h2>
+          <p>Comparaison entre montants actuels, historique simulé et marges.</p>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <span>Montant actuel</span>
+            <strong>{{ kpis.montantTotalFcfa || 0 | number:'1.0-0' }} FCFA</strong>
+          </div>
+
+          <div class="kpi-card">
+            <span>Historique simulé</span>
+            <strong>{{ getTotalHistorique() | number:'1.0-0' }} FCFA</strong>
+          </div>
+
+          <div class="kpi-card">
+            <span>Évolution</span>
+            <strong [class]="getEvolutionGlobale() >= 0 ? 'success-text' : 'danger-text'">
+              {{ getEvolutionGlobale() | number:'1.0-2' }} %
+            </strong>
+          </div>
+
+          <div class="kpi-card">
+            <span>Marge nette moyenne</span>
+            <strong [class]="getMargeClass(kpis.margeNetteMoyenne || 0)">
+              {{ kpis.margeNetteMoyenne || 0 | number:'1.0-2' }} %
+            </strong>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-card">
+            <h3>Comparaison devis vs historique</h3>
+            <p>Montant actuel comparé à l’historique simulé.</p>
+
+            <div class="chart-box">
+              <canvas baseChart [data]="amountChartData" [options]="chartOptions" type="bar"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <h3>Marge moyenne par section</h3>
+            <p>Courbe de rentabilité des sections.</p>
+
+            <div class="chart-box">
+              <canvas baseChart [data]="marginChartData" [options]="chartOptions" type="line"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3>Montant FCFA par section</h3>
+          <p>Lecture détaillée des montants par section.</p>
+
+          <div class="bar-list">
+            <div class="bar-row" *ngFor="let s of sections">
+              <div class="bar-label">
+                <strong>Section {{ s.section }}</strong>
+                <span>{{ s.montantFcfa | number:'1.0-0' }} FCFA</span>
+              </div>
+
+              <div class="bar-track">
+                <div class="bar-fill amount" [style.width.%]="getBarWidth(s.montantFcfa, maxMontant)"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= PAGE 3 : SECTIONS ================= -->
+      <section *ngIf="activePage === 'sections'">
+        <div class="section-header">
+          <h2>Analyse par sections et catégories — {{ codeProjet }}</h2>
+          <p>Drill-down métier pour identifier les postes les plus importants.</p>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <span>Sections</span>
+            <strong>{{ sections.length }}</strong>
+          </div>
+
+          <div class="kpi-card">
+            <span>Catégories</span>
+            <strong>{{ categories.length }}</strong>
+          </div>
+
+          <div class="kpi-card">
+            <span>Top catégorie</span>
+            <strong>{{ getTopCategories()[0]?.categorie || '-' }}</strong>
+          </div>
+
+          <div class="kpi-card danger">
+            <span>Alertes critiques</span>
+            <strong>{{ getCriticalAlerts().length }}</strong>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-card">
+            <h3>Montant par catégorie</h3>
+            <p>Analyse détaillée des catégories.</p>
+
+            <div class="chart-box">
+              <canvas baseChart [data]="categoryAmountChartData" [options]="chartOptions" type="bar"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <h3>Marge moyenne par catégorie</h3>
+            <p>Rentabilité détaillée des postes.</p>
+
+            <div class="chart-box">
+              <canvas baseChart [data]="categoryMarginChartData" [options]="chartOptions" type="line"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="chart-card">
+            <h3>Drill-down par section</h3>
+            <p>Cliquez sur une section pour afficher ses catégories.</p>
+
+            <div class="bar-list">
+              <div class="bar-row clickable" *ngFor="let s of sections" (click)="selectSection(s)">
+                <div class="bar-label">
+                  <strong>Section {{ s.section }}</strong>
+                  <span>{{ s.margeMoyenne | number:'1.0-2' }} %</span>
+                </div>
+
+                <div class="bar-track">
+                  <div class="bar-fill margin" [style.width.%]="getBarWidth(s.margeMoyenne, maxMarge)"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <h3>Top 5 catégories</h3>
+            <p>Les catégories qui pèsent le plus dans le montant total.</p>
+
+            <div class="top-list">
+              <div class="top-item" *ngFor="let c of getTopCategories(); let i = index">
+                <span>{{ i + 1 }}</span>
+
+                <div>
+                  <strong>{{ c.categorie }}</strong>
+                  <small>Section {{ c.section }}</small>
+                </div>
+
+                <b>{{ c.montantFcfa | number:'1.0-0' }} FCFA</b>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="drill-card" *ngIf="selectedSection">
+          <div class="drill-header">
+            <div>
+              <h3>Détail Section {{ selectedSection.section }}</h3>
+              <p>Analyse par catégorie.</p>
+            </div>
+
+            <button type="button" class="clear-btn" (click)="clearDrillDown()">Fermer</button>
+          </div>
+
+          <div class="drill-kpis">
+            <div>
+              <span>Montant section</span>
+              <strong>{{ selectedSection.montantFcfa | number:'1.0-0' }} FCFA</strong>
+            </div>
+
+            <div>
+              <span>Marge moyenne</span>
+              <strong>{{ selectedSection.margeMoyenne | number:'1.0-2' }} %</strong>
+            </div>
+
+            <div>
+              <span>Anomalies</span>
+              <strong>{{ selectedSection.anomalies }}</strong>
+            </div>
+          </div>
+
+          <table class="drill-table">
+            <thead>
+              <tr>
+                <th>Catégorie</th>
+                <th>Montant FCFA</th>
+                <th>Marge moyenne</th>
+                <th>Anomalies</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let c of selectedCategories">
+                <td>{{ c.categorie }}</td>
+                <td>{{ c.montantFcfa | number:'1.0-0' }}</td>
+                <td [class]="getMargeClass(c.margeMoyenne)">
+                  {{ c.margeMoyenne | number:'1.0-2' }} %
+                </td>
+                <td>{{ c.anomalies }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================= PAGE 4 : ALERTES ================= -->
+      <section *ngIf="activePage === 'alertes'">
+        <div class="section-header">
+          <h2>Alertes IA & recommandations — {{ codeProjet }}</h2>
+          <p>Détection automatique des anomalies et aide à la décision.</p>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card danger">
+            <span>Total anomalies</span>
+            <strong>{{ kpis.nombreAnomalies || 0 }}</strong>
+          </div>
+
+          <div class="kpi-card">
+            <span>Taux anomalies</span>
+            <strong>{{ getAnomalyRate() }} %</strong>
+          </div>
+
+          <div class="kpi-card">
+            <span>Niveau de risque</span>
+            <strong>{{ getRiskLevel() }}</strong>
+          </div>
+
+          <div class="kpi-card">
+            <span>Alertes critiques</span>
+            <strong>{{ getCriticalAlerts().length }}</strong>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-card">
+            <h3>Anomalies par section</h3>
+            <p>Sections nécessitant une vérification.</p>
+
+            <div class="chart-box">
+              <canvas baseChart [data]="anomalyChartData" [options]="chartOptions" type="bar"></canvas>
+            </div>
+          </div>
+
+          <div class="recommendation-card">
+            <h3>Recommandations automatiques</h3>
+
+            <div class="recommendation-list">
+              <div class="recommendation-item">
+                <strong>Contrôle des marges faibles</strong>
+                <p>Vérifier les lignes avec marge inférieure à 5 %.</p>
+              </div>
+
+              <div class="recommendation-item">
+                <strong>Validation des prix unitaires élevés</strong>
+                <p>Contrôler les PU supérieurs à 10 000 000 FCFA.</p>
+              </div>
+
+              <div class="recommendation-item">
+                <strong>Analyse des catégories sensibles</strong>
+                <p>Prioriser les catégories ayant un fort montant et une marge faible.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="alerts-card">
+          <div class="alerts-header">
+            <div>
+              <h3>Alertes anomalies en temps réel</h3>
+              <p>Détection automatique des lignes nécessitant une vérification.</p>
+            </div>
+
+            <span class="alert-count">{{ alertes.length }} alertes</span>
+          </div>
+
+          <div class="empty" *ngIf="alertes.length === 0">
+            Aucune anomalie détectée.
+          </div>
+
+          <div class="alerts-list" *ngIf="alertes.length > 0">
+            <div class="alert-item" *ngFor="let a of alertes" [class.critical]="a.niveau === 'Critique'">
+              <div class="alert-icon">⚠️</div>
+
+              <div class="alert-content">
+                <strong>{{ a.message }}</strong>
+                <p>Section {{ a.section }} — {{ a.designation }}</p>
+                <small>
+                  Niveau : {{ a.niveau }} |
+                  Catégorie : {{ a.categorie }} |
+                  PU : {{ a.pu | number:'1.0-0' }} FCFA |
+                  Marge : {{ a.marge | number:'1.0-2' }} %
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= PAGE 5 : COÛTS & MARGES UNIQUEMENT DI-M3 ================= -->
+      <section *ngIf="activePage === 'couts' && codeProjet === 'DI-M3'">
+        <div class="section-header">
+          <h2>Analyse des coûts et marges — {{ codeProjet }}</h2>
+          <p>
+            Analyse des coûts finaux, des prix de revient et des marges pour le projet sélectionné.
+          </p>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <span>Nombre de lignes coût</span>
+            <strong>{{ couts.kpis?.totalCouts || 0 }}</strong>
+          </div>
+
+          <div class="kpi-card">
+            <span>Coût final total</span>
+            <strong>{{ couts.kpis?.coutFinalTotalDt || 0 | number:'1.0-0' }} DT</strong>
+          </div>
+
+          <div class="kpi-card">
+            <span>Prix revient total</span>
+            <strong>{{ couts.kpis?.prixRevientTotalEur || 0 | number:'1.0-0' }} EUR</strong>
+          </div>
+
+          <div class="kpi-card danger">
+            <span>Coûts critiques</span>
+            <strong>{{ couts.kpis?.coutsCritiques || 0 }}</strong>
+          </div>
+        </div>
+
+        <div class="executive-grid">
+          <div class="score-card">
+            <div class="score-circle">
+              <span>{{ (couts.kpis?.margeNettePctMoyenne || 0) * 100 | number:'1.0-0' }}%</span>
+            </div>
+
+            <div>
+              <h3>Rentabilité des coûts</h3>
+              <p [class]="getCostHealthClass()">{{ getCostHealthStatus() }}</p>
+            </div>
+          </div>
+
+          <div class="mini-card">
+            <span>Marge brute moyenne</span>
+            <strong>{{ (couts.kpis?.margeBrutePctMoyenne || 0) * 100 | number:'1.0-2' }} %</strong>
+            <p>Indicateur de performance avant marge nette.</p>
+          </div>
+
+          <div class="mini-card">
+            <span>Marge nette moyenne</span>
+            <strong [class]="getCostHealthClass()">
+              {{ (couts.kpis?.margeNettePctMoyenne || 0) * 100 | number:'1.0-2' }} %
+            </strong>
+            <p>Indicateur final de rentabilité.</p>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-card">
+            <h3>Répartition des coûts</h3>
+            <p>Prix de revient, frais généraux et marge sous-traitant.</p>
+
+            <div class="chart-box">
+              <canvas baseChart [data]="costBreakdownChartData" [options]="chartOptions" type="doughnut"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <h3>Marge brute vs marge nette</h3>
+            <p>Comparaison des marges par ligne de coût.</p>
+
+            <div class="chart-box">
+              <canvas baseChart [data]="marginCostChartData" [options]="chartOptions" type="bar"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3>Évolution coût final / prix de revient</h3>
+          <p>Lecture comparative des coûts par identifiant.</p>
+
+          <div class="chart-box">
+            <canvas baseChart [data]="costEvolutionChartData" [options]="chartOptions" type="line"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3>Top 10 coûts finaux</h3>
+          <p>Les lignes ayant le coût final le plus élevé.</p>
+
+          <div class="top-list">
+            <div class="top-item" *ngFor="let c of getVisibleTopCouts(); let i = index">
+              <span>{{ i + 1 }}</span>
+
+              <div>
+                <strong>Coût {{ c.idCout }}</strong>
+                <small>
+                  Marge nette :
+                  {{ (c.margeNettePct || 0) * 100 | number:'1.0-2' }} %
+                </small>
+              </div>
+
+              <b>{{ c.coutFinalDt | number:'1.0-0' }} DT</b>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
