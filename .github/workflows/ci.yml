@@ -61,7 +61,7 @@ jobs:
       - name: Build frontend
         run: npx nx build frontend --configuration=production --skip-nx-cache
 
-          docker-build:
+  docker-build:
     name: Docker Build Validation
     runs-on: ubuntu-latest
     needs: [backend, frontend]
