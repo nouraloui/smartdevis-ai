@@ -65,9 +65,10 @@ app.use('/api/n8n-agent', n8nAgentRoutes);
 
 // ── Health check ──────────────────────────────────────────────
 app.get('/health', (req, res) => {
-  res.json({
-    status: 'OK',
-    service: 'SmartDevis Backend'
+  res.status(200).json({
+    success: true,
+    message: 'SmartDevis Backend is running',
+    environment: process.env.NODE_ENV
   });
 });
 
