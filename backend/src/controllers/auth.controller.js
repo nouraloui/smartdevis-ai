@@ -155,7 +155,9 @@ const forgotPassword = async (req, res, next) => {
     user.resetPasswordExpire = resetExpire;
     await user.save();
 
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
+    const frontendUrl =
+      process.env.FRONTEND_URL || 'https://smartdevis-frontend.onrender.com';
+
     const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
 
     const html = `
@@ -164,8 +166,8 @@ const forgotPassword = async (req, res, next) => {
         <p>Bonjour ${user.nom},</p>
         <p>Vous avez demandé la réinitialisation de votre mot de passe.</p>
         <p>
-          <a 
-            href="${resetUrl}" 
+          <a
+            href="${resetUrl}"
             style="background:#ef4444;color:#fff;padding:12px 18px;text-decoration:none;border-radius:6px;display:inline-block;"
           >
             Réinitialiser mon mot de passe
