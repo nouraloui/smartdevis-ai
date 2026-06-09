@@ -26,13 +26,25 @@ const app = express();
 // ── Sécurité ──────────────────────────────────────────────────
 app.use(helmet());
 
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'https://smartdevis-frontend.onrender.com',
+  'http://localhost:4200',
+  'http://127.0.0.1:4200',
+  'http://localhost:51231',
+  'http://127.0.0.1:51231'
+].filter(Boolean);
+
 app.use(cors({
-  origin: [
-    'http://localhost:4200',
-    'http://localhost:51231',
-    'http://127.0.0.1:4200',
-    'http://127.0.0.1:51231'
-  ],
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error(`CORS non autorisé : ${origin}`));
+  },
   credentials: true
 }));
 
