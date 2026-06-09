@@ -20,33 +20,38 @@ const assistantRoutes = require('./routes/assistant.routes');
 // Nouvelle route n8n
 const n8nAgentRoutes = require('./routes/n8n-agent.routes');
 
-
 const app = express();
 
 // ── Sécurité ──────────────────────────────────────────────────
-app.use(helmet());
-
 const allowedOrigins = [
-  process.env.FRONTEND_URL,
   'https://smartdevis-frontend.onrender.com',
   'http://localhost:4200',
-  'http://127.0.0.1:4200',
-  'http://localhost:51231',
-  'http://127.0.0.1:51231'
-].filter(Boolean);
+  'http://127.0.0.1:4200'
+];
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
 
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
 
-    return callback(new Error(`CORS non autorisé : ${origin}`));
-  },
-  credentials: true
-}));
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header(
+    'Access-Control-Allow-Methods',
+    'GET,POST,PUT,PATCH,DELETE,OPTIONS'
+  );
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+  );
+
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+
+  next();
+});
 
 // ── Rate limiting ─────────────────────────────────────────────
 const limiter = rateLimit({
@@ -61,6 +66,14 @@ app.use(morgan('dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// ── Health check ──────────────────────────────────────────────
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'OK',
+    service: 'SmartDevis Backend'
+  });
+});
+
 // ── Routes existantes ─────────────────────────────────────────
 app.use('/api/auth', authRoutes);
 app.use('/api/devis', devisRoutes);
@@ -74,17 +87,6 @@ app.use('/api/assistant', assistantRoutes);
 
 // ── Nouvelle route Agent IA n8n ───────────────────────────────
 app.use('/api/n8n-agent', n8nAgentRoutes);
-
-// ── Health check ──────────────────────────────────────────────
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'SmartDevis Backend is running',
-    environment: process.env.NODE_ENV
-  });
-});
-
-
 
 // ── Route 404 ─────────────────────────────────────────────────
 app.use((req, res) => {
