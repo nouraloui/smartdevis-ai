@@ -63,6 +63,20 @@ jobs:
       - name: Build frontend
         run: npx nx build frontend --configuration=production --skip-nx-cache
 
+  ia-service:
+    name: IA Service - Build Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build IA Docker image
+        run: |
+          docker build \
+          -t smartdevis-ia-service:latest \
+          ./backend/ia-service
+
   docker-build:
     name: Docker Build Validation
     runs-on: ubuntu-latest
@@ -70,6 +84,7 @@ jobs:
     needs:
       - backend
       - frontend
+      - ia-service
 
     steps:
       - name: Checkout repository
@@ -85,6 +100,12 @@ jobs:
 
       - name: Build Docker images
         run: docker compose build
+
+      - name: Build IA Service Image
+        run: |
+          docker build \
+          -t smartdevis-ia-service:latest \
+          ./backend/ia-service
 
   docker-push:
     name: Docker Push to Docker Hub
@@ -141,3 +162,14 @@ jobs:
         run: |
           docker push \
           ${{ secrets.DOCKERHUB_USERNAME }}/smartdevis-frontend:latest
+
+      - name: Build IA Service Image
+        run: |
+          docker build \
+          -t ${{ secrets.DOCKERHUB_USERNAME }}/smartdevis-ia-service:latest \
+          ./backend/ia-service
+
+      - name: Push IA Service Image
+        run: |
+          docker push \
+          ${{ secrets.DOCKERHUB_USERNAME }}/smartdevis-ia-service:latest
