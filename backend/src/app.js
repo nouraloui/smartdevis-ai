@@ -23,7 +23,8 @@ const n8nAgentRoutes = require('./routes/n8n-agent.routes');
 const app = express();
 
 // ── Sécurité ──────────────────────────────────────────────────
-app.use(helmet());
+// app.use(helmet());
+// ── CORS ──────────────────────────────────────────────────
 
 const allowedOrigins = [
   process.env.FRONTEND_URL,
