@@ -23,35 +23,34 @@ const n8nAgentRoutes = require('./routes/n8n-agent.routes');
 const app = express();
 
 // ── Sécurité ──────────────────────────────────────────────────
+app.use(helmet());
+
 const allowedOrigins = [
+  process.env.FRONTEND_URL,
   'https://smartdevis-frontend.onrender.com',
   'http://localhost:4200',
-  'http://127.0.0.1:4200'
-];
+  'http://127.0.0.1:4200',
+  'http://localhost:51231',
+  'http://127.0.0.1:51231'
+].filter(Boolean);
 
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
 
-  if (allowedOrigins.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-  }
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
 
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header(
-    'Access-Control-Allow-Methods',
-    'GET,POST,PUT,PATCH,DELETE,OPTIONS'
-  );
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept, Authorization'
-  );
+    return callback(new Error(`CORS non autorisé : ${origin}`));
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+};
 
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(204);
-  }
-
-  next();
-});
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // ── Rate limiting ─────────────────────────────────────────────
 const limiter = rateLimit({
