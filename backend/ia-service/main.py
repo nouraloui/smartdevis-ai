@@ -10,13 +10,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sklearn.ensemble import IsolationForest, RandomForestRegressor
 from sklearn.cluster import KMeans
-from sentence_transformers import SentenceTransformer
+# from sentence_transformers import SentenceTransformer
 from typing import List, Optional
 import numpy as np
 import uvicorn
 from sklearn.ensemble import IsolationForest, RandomForestRegressor
-from sklearn.cluster import KMeans, DBSCAN
-from sklearn.metrics.pairwise import cosine_similarity
+#from sklearn.cluster import KMeans, DBSCAN
+#from sklearn.metrics.pairwise import cosine_similarity
 
 
 # =========================
@@ -38,8 +38,13 @@ app.add_middleware(
 # CHARGEMENT DU MODÈLE NLP
 # =========================
 
-nlp_model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+# =====================================
+# NLP désactivé pour Render Free
+# =====================================
 
+# nlp_model = SentenceTransformer(
+#     "paraphrase-multilingual-MiniLM-L12-v2"
+# )
 
 # =========================
 # SCHÉMAS DE DONNÉES
@@ -80,22 +85,21 @@ class MarginPredictionRequest(BaseModel):
     categorie_code: float = 1
 
 
-class ServiceLine(BaseModel):
-    id: Optional[str] = None
-    section: Optional[str] = ""
-    designation: Optional[str] = ""
-    categorie: Optional[str] = ""
-    sousCategorie: Optional[str] = ""
-    unite: Optional[str] = ""
-    puContratFcfaArrondi: Optional[float] = 0
-    montantFcfa: Optional[float] = 0
-    margeNettePct: Optional[float] = 0
+# class ServiceLine(BaseModel):
+#     id: Optional[str] = None
+#     section: Optional[str] = ""
+#     designation: Optional[str] = ""
+#     categorie: Optional[str] = ""
+#     sousCategorie: Optional[str] = ""
+#     unite: Optional[str] = ""
+#     puContratFcfaArrondi: Optional[float] = 0
+#     montantFcfa: Optional[float] = 0
+#     margeNettePct: Optional[float] = 0
 
 
-class SemanticRequest(BaseModel):
-    lignes: List[ServiceLine]
-    n_clusters: Optional[int] = 6
-
+# class SemanticRequest(BaseModel):
+#     lignes: List[ServiceLine]
+#     n_clusters: Optional[int] = 6
 
 # =========================
 # HELPERS
@@ -152,7 +156,7 @@ def root():
             "/risk-score",
             "/suggest-values",
             "/predict-margin",
-            "/semantic-analysis"
+            # "/semantic-analysis"
         ]
     }
 
@@ -1025,8 +1029,8 @@ def predict_margin(data: MarginPredictionRequest):
 # MODULE NLP — ANALYSE SÉMANTIQUE
 # =========================
 
-@app.post("/semantic-analysis")
-def semantic_analysis(payload: SemanticRequest):
+# @app.post("/semantic-analysis")
+# def semantic_analysis(payload: SemanticRequest):
     lignes = payload.lignes
     n_clusters = int(payload.n_clusters or 6)
 
