@@ -1,0 +1,224 @@
+{
+  "name": "SmartDevis Agent IA",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "devis-agent",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -464,
+        0
+      ],
+      "id": "d061dfba-1f11-42c7-99c2-e09c189764e0",
+      "name": "Webhook",
+      "webhookId": "6a44e90d-dbc9-446e-b205-27ba0ecc303a"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message || $json.body?.message || \"Bonjour\" }}",
+        "options": {
+          "systemMessage": "Tu es SmartDevis AI, un assistant spécialisé dans l'analyse des devis, projets et données financières.\n\nTu disposes de deux outils :\n\n━━━━━━━━━━━━━━━━━━━━━━\nOUTIL 1 : mysql_devis_query\n━━━━━━━━━━━━━━━━━━━━━━\n\nUtiliser cet outil pour toute question concernant :\n\n- devis\n- lignes de devis\n- coûts\n- montants\n- marges\n- catégories\n- sections\n- personnel\n- analyses financières\n- fact_ligne_devis\n- dim_categorie\n- dim_personnel\n- dim_cout\n- dim_cout_corrige\n- calculs et statistiques\n\nExemples :\n\n- Analyse le devis DI-M3\n- Quel est le montant total du devis ?\n- Quelle est la marge du projet ?\n- Affiche les lignes de devis\n- Quels sont les coûts les plus élevés ?\n\n━━━━━━━━━━━━━━━━━━━━━━\nOUTIL 2 : mongo_query\n━━━━━━━━━━━━━━━━━━━━━━\n\nUtiliser cet outil pour toute question concernant :\n\n- projets\n- dim_projet\n- utilisateurs\n- conversations\n- rapports\n- chefs de projet\n- directeurs\n- statuts\n- risques\n- avancement\n- budgets\n\nExemples :\n\n- Affiche les projets\n- Qui est le directeur du projet DI-M3 ?\n- Quel est l'avancement du projet DI-M3 ?\n- Quels sont les projets à risque élevé ?\n- Quel est le budget prévu du projet DI ?\n\nQuand tu appelles mongo_query, tu dois toujours fournir ces paramètres :\n- collection : nom exact de la collection\n- query : objet JSON MongoDB\n- limit : nombre maximum, par défaut 50\n\nExemples :\nmongo_query({\n  \"collection\": \"dim_projet\",\n  \"query\": {},\n  \"limit\": 50\n})\n\nmongo_query({\n  \"collection\": \"dim_projet\",\n  \"query\": {\n    \"code_projet\": \"DI-M3\"\n  },\n  \"limit\": 50\n})\n\n━━━━━━━━━━━━━━━━━━━━━━\nRÈGLES OBLIGATOIRES\n━━━━━━━━━━━━━━━━━━━━━━\n\n1. Ne jamais inventer une réponse.\n\n2. Utiliser un outil seulement si la question concerne les devis, projets, coûts, marges, montants ou données stockées. \nPour une salutation simple comme \"bonjour\", répondre directement sans outil.\n\n3. Si plusieurs outils sont nécessaires, appeler les deux outils.\n\n4. Répondre uniquement avec les données retournées par les outils.\n\n5. Si aucune donnée n'est trouvée, répondre :\n\n\"Je ne trouve pas cette information dans les données disponibles.\"\n\n6. Répondre en français.\n\n7. Répondre de manière concise, professionnelle et structurée.\n\n8. Lorsque la question contient :\n   - projet → utiliser mongo_query\n   - devis, coût, marge, montant → utiliser mysql_devis_query\n\n9. Après avoir reçu les résultats des outils, formater la réponse de façon lisible pour l'utilisateur.\n\nNe jamais afficher les requêtes SQL ou MongoDB.",
+          "maxIterations": 10
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -96,
+        0
+      ],
+      "id": "75d1c3df-438d-4671-93ce-3f9e9e476986",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "collection": "={{ $fromAI(\"collection\", \"Nom exact de la collection MongoDB parmi: dim_projet, users, conversations, rapports, devis\", \"string\") }}",
+        "options": {
+          "limit": "={{ $fromAI(\"limit\", \"Nombre maximum de documents à retourner. Par défaut 50.\", \"number\") || 50 }}"
+        },
+        "query": "={{ JSON.stringify($fromAI(\"query\", \"Filtre MongoDB au format JSON. Exemple: {} ou {\\\"code_projet\\\":\\\"DI-M3\\\"}\", \"json\") || {}) }}"
+      },
+      "type": "n8n-nodes-base.mongoDbTool",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        240
+      ],
+      "id": "36d15144-b512-4496-bbca-6d325b69c7b2",
+      "name": "mongo_query",
+      "credentials": {
+        "mongoDb": {
+          "id": "W8WLiHucuE3SCOy2",
+          "name": "MongoDB account"
+        }
+      },
+      "notes": "Utilise cet outil uniquement pour interroger la base MongoDB SmartDevis.\n\nCollections autorisées :\n- dim_projet\n- users\n- conversations\n- rapports\n- devis\n\nRègles :\n- Utiliser dim_projet pour les projets créés ou affichés dans l'application.\n- Utiliser users pour les utilisateurs, rôles, emails et comptes actifs.\n- Utiliser conversations pour l'historique des conversations.\n- Utiliser rapports pour les rapports générés.\n- Utiliser devis pour les lignes de devis ajoutées depuis l'application web.\n\nUtiliser cet outil pour les questions contenant :\nprojet, projets, utilisateur, users, email, rôle, role, conversation, rapport, application, avancement, risque, statut, directeur, chef de projet, budget prévu, montant réalisé.\n\nExemples obligatoires :\n\nQuestion :\nCombien de projets existe-t-il ?\n\nAction :\ncollection = dim_projet\nquery = {}\n\nQuestion :\nListe les projets\n\nAction :\ncollection = dim_projet\nquery = {}\n\nQuestion :\nPrésente-moi le projet DI-M3\n\nAction :\ncollection = dim_projet\nquery = {\n  \"code_projet\": \"DI-M3\"\n}\n\nQuestion :\nQui est le directeur du projet DI-M3 ?\n\nAction :\ncollection = dim_projet\nquery = {\n  \"code_projet\": \"DI-M3\"\n}\n\nQuestion :\nListe les utilisateurs\n\nAction :\ncollection = users\nquery = {}\n\nQuestion :\nListe les devis ajoutés depuis l'application\n\nAction :\ncollection = devis\nquery = {}\n\nToujours retourner uniquement les résultats provenant de MongoDB.\nNe jamais inventer de données.\nLimiter les résultats à 50 maximum."
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body?.sessionId || $json.sessionId || \"smartdevis-test-002\" }}",
+        "contextWindowLength": 1
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -112,
+        240
+      ],
+      "id": "5d320af7-203c-4c3d-9c1f-450afac844e0",
+      "name": "Simple Memory",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  success: true,\n  answer: $json.output || $json.text || $json.response || \"Aucune réponse reçue depuis l’agent IA.\"\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        336,
+        0
+      ],
+      "id": "a054bd5f-d0e5-4de8-aa3c-b0fd2730bd79",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  f.code_projet,\n  COUNT(*) AS total_lignes,\n  SUM(f.montant_fcfa) AS montant_total_fcfa,\n  SUM(f.montant_eur) AS montant_total_eur,\n  c.code_section,\n  c.libelle_section,\n  p.designation,\n  p.unite,\n  p.sous_taches\nFROM fact_ligne_devis f\nLEFT JOIN dim_categorie c \n  ON f.id_categorie = c.id_categorie\nLEFT JOIN dim_personnel p \n  ON f.id_personnel = p.id_personnel\nGROUP BY \n  f.code_projet,\n  c.code_section,\n  c.libelle_section,\n  p.designation,\n  p.unite,\n  p.sous_taches\nLIMIT 50;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySqlTool",
+      "typeVersion": 2.5,
+      "position": [
+        64,
+        240
+      ],
+      "id": "f8635c31-ac78-4921-a147-ad517e0cfe4c",
+      "name": "mysql_devis_query",
+      "notesInFlow": false,
+      "credentials": {
+        "mySql": {
+          "id": "5jkVQJpPiIlESQQ1",
+          "name": "MySQL account"
+        }
+      },
+      "notes": "Utilise cet outil uniquement pour interroger la base MySQL SmartDevis.\n\nCet outil sert aux données analytiques, historiques et financières.\n\nTables autorisées :\n- fact_ligne_devis\n- dim_projet\n- dim_categorie\n- dim_personnel\n- dim_cout\n- dim_coutt_corrige\n- dim_devise\n\nRègles :\n- Utiliser fact_ligne_devis pour les lignes de devis historiques.\n- Utiliser dim_cout ou dim_coutt_corrige pour les coûts, marges et prix de revient.\n- Utiliser dim_categorie pour les sections, catégories et libellés.\n- Utiliser dim_personnel pour les désignations, unités et sous-tâches.\n- Utiliser dim_projet MySQL uniquement pour les projets décisionnels liés aux devis historiques.\n\nUtiliser cet outil pour les questions contenant :\ndevis, coût, cout, marge, montant, ligne, catégorie, section, personnel, prix, total, analyse financière.\n\nToujours retourner uniquement les résultats provenant de MySQL.\nNe jamais inventer de données.\nLimiter les résultats avec LIMIT 50 maximum."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -320,
+        256
+      ],
+      "id": "a16f2094-0b06-4c80-9d98-c709386a9a17",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "r9gzwYC3KqJXmQPa",
+          "name": "OpenAI account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "mongo_query": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "mysql_devis_query": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "89d57947-46e0-4e38-ba21-db5e16969218",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8f83183e9d55f421f2bd956771371ec0a7382142d9157debf222c308f23da9aa"
+  },
+  "id": "s2MdNymLRiCsm6wW",
+  "tags": []
+}
