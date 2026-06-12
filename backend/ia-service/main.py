@@ -10,13 +10,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sklearn.ensemble import IsolationForest, RandomForestRegressor
 from sklearn.cluster import KMeans
-# from sentence_transformers import SentenceTransformer
+#from sentence_transformers import SentenceTransformer
 from typing import List, Optional
 import numpy as np
 import uvicorn
 from sklearn.ensemble import IsolationForest, RandomForestRegressor
-#from sklearn.cluster import KMeans, DBSCAN
-#from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.cluster import KMeans, DBSCAN
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 # =========================
@@ -42,9 +43,7 @@ app.add_middleware(
 # NLP désactivé pour Render Free
 # =====================================
 
-# nlp_model = SentenceTransformer(
-#     "paraphrase-multilingual-MiniLM-L12-v2"
-# )
+#nlp_model = SentenceTransformer( "paraphrase-multilingual-MiniLM-L12-v2")
 
 # =========================
 # SCHÉMAS DE DONNÉES
@@ -85,21 +84,20 @@ class MarginPredictionRequest(BaseModel):
     categorie_code: float = 1
 
 
-# class ServiceLine(BaseModel):
-#     id: Optional[str] = None
-#     section: Optional[str] = ""
-#     designation: Optional[str] = ""
-#     categorie: Optional[str] = ""
-#     sousCategorie: Optional[str] = ""
-#     unite: Optional[str] = ""
-#     puContratFcfaArrondi: Optional[float] = 0
-#     montantFcfa: Optional[float] = 0
-#     margeNettePct: Optional[float] = 0
+class ServiceLine(BaseModel):
+     id: Optional[str] = None
+     section: Optional[str] = ""
+     designation: Optional[str] = ""
+     categorie: Optional[str] = ""
+     sousCategorie: Optional[str] = ""
+     unite: Optional[str] = ""
+     puContratFcfaArrondi: Optional[float] = 0
+     montantFcfa: Optional[float] = 0
+     margeNettePct: Optional[float] = 0
 
-
-# class SemanticRequest(BaseModel):
-#     lignes: List[ServiceLine]
-#     n_clusters: Optional[int] = 6
+class SemanticRequest(BaseModel):
+     lignes: List[ServiceLine]
+     n_clusters: Optional[int] = 6
 
 # =========================
 # HELPERS
@@ -156,7 +154,7 @@ def root():
             "/risk-score",
             "/suggest-values",
             "/predict-margin",
-            # "/semantic-analysis"
+            "/semantic-analysis"
         ]
     }
 
@@ -1029,43 +1027,53 @@ def predict_margin(data: MarginPredictionRequest):
 # MODULE NLP — ANALYSE SÉMANTIQUE
 # =========================
 
-# @app.post("/semantic-analysis")
-# def semantic_analysis(payload: SemanticRequest):
-    lignes = payload.lignes
-    n_clusters = int(payload.n_clusters or 6)
+@app.post("/semantic-analysis")
+def semantic_analysis(payload: SemanticRequest):
+    lignes = payload.lignes or []
 
-    if not lignes:
+    if len(lignes) == 0:
         return {
-            "success": False,
-            "message": "Aucune ligne fournie pour l’analyse sémantique.",
+            "success": True,
+            "model": "TF-IDF + KMeans + DBSCAN",
             "totalLignes": 0,
             "nombreClusters": 0,
             "nombreOutliers": 0,
             "clusters": [],
             "outliers": [],
-            "results": [],
-            "model": "Sentence Transformers + KMeans + DBSCAN"
+            "results": []
         }
 
-    textes = []
+    texts = []
 
-    for ligne in lignes:
-        texte = f"""
-        {ligne.section or ''}
-        {ligne.designation or ''}
-        {ligne.categorie or ''}
-        {ligne.sousCategorie or ''}
-        {ligne.unite or ''}
-        """
-        textes.append(texte.strip())
+    for i, ligne in enumerate(lignes):
+        parts = [
+            ligne.section or "",
+            ligne.designation or "",
+            ligne.categorie or "",
+            ligne.sousCategorie or "",
+            ligne.unite or ""
+        ]
 
-    embeddings = nlp_model.encode(textes)
+        text = " ".join(str(x).strip() for x in parts if str(x).strip() and str(x).strip() != "-")
 
-    n_clusters = max(2, min(n_clusters, len(lignes)))
+        if not text:
+            text = f"prestation_{i}"
 
-    # =========================
-    # KMEANS
-    # =========================
+        texts.append(text)
+
+    vectorizer = TfidfVectorizer(
+        lowercase=True,
+        max_features=500,
+        ngram_range=(1, 2),
+        token_pattern=r"(?u)\b\w+\b"
+    )
+
+    embeddings = vectorizer.fit_transform(texts).toarray()
+
+    n_clusters = min(int(payload.n_clusters or 6), len(lignes))
+
+    if n_clusters < 1:
+        n_clusters = 1
 
     kmeans = KMeans(
         n_clusters=n_clusters,
@@ -1073,76 +1081,45 @@ def predict_margin(data: MarginPredictionRequest):
         n_init=10
     )
 
-    kmeans_labels = kmeans.fit_predict(embeddings)
-
-    # =========================
-    # DBSCAN
-    # =========================
-    # eps peut être ajusté entre 0.45 et 0.75 selon tes données.
-    # Plus eps est petit, plus DBSCAN détecte d'isolés.
-    # Plus eps est grand, moins il détecte d'isolés.
+    labels = kmeans.fit_predict(embeddings)
 
     dbscan = DBSCAN(
-        eps=0.55,
+        eps=0.85,
         min_samples=2,
         metric="cosine"
     )
 
     dbscan_labels = dbscan.fit_predict(embeddings)
 
-    # =========================
-    # SIMILARITÉS
-    # =========================
-
-    similarity_matrix = cosine_similarity(embeddings)
+    similarities = cosine_similarity(embeddings)
 
     results = []
 
     for i, ligne in enumerate(lignes):
-        pu_i = float(ligne.puContratFcfaArrondi or 0)
-        marge_i = float(ligne.margeNettePct or 0)
-
         similar_items = []
 
         for j, other in enumerate(lignes):
             if i == j:
                 continue
 
-            similarite = float(similarity_matrix[i][j]) * 100
+            sim = similarities[i][j] * 100
 
-            if similarite >= 80:
-                pu_j = float(other.puContratFcfaArrondi or 0)
+            if sim >= 70:
+                prix1 = ligne.puContratFcfaArrondi or 0
+                prix2 = other.puContratFcfaArrondi or 0
 
-                if pu_i > 0 and pu_j > 0:
-                    ecart_prix_pct = abs(pu_i - pu_j) / max(pu_i, pu_j) * 100
-                else:
-                    ecart_prix_pct = 0
-
-                if ecart_prix_pct >= 40:
-                    decision = "Écart prix élevé"
-                elif ecart_prix_pct >= 20:
-                    decision = "À contrôler"
-                else:
-                    decision = "Cohérent"
+                ecart = 0
+                if prix1 > 0 and prix2 > 0:
+                    ecart = abs(prix1 - prix2) / max(prix1, prix2) * 100
 
                 similar_items.append({
                     "id": other.id,
                     "categorie": other.categorie,
                     "sousCategorie": other.sousCategorie,
-                    "puContratFcfaArrondi": pu_j,
-                    "margeNettePct": float(other.margeNettePct or 0),
-                    "similarite": round(similarite, 2),
-                    "ecartPrixPct": round(ecart_prix_pct, 2),
-                    "decision": decision
+                    "similarite": round(sim, 2),
+                    "ecartPrixPct": round(ecart, 2),
+                    "decision": "Cohérent" if ecart < 30 else "À vérifier"
                 })
-
-        similar_items = sorted(
-            similar_items,
-            key=lambda x: x["similarite"],
-            reverse=True
-        )[:3]
-
-        is_outlier = dbscan_labels[i] == -1
 
         results.append({
             "id": ligne.id,
@@ -1151,27 +1128,19 @@ def predict_margin(data: MarginPredictionRequest):
             "categorie": ligne.categorie,
             "sousCategorie": ligne.sousCategorie,
             "unite": ligne.unite,
-            "puContratFcfaArrondi": pu_i,
-            "montantFcfa": float(ligne.montantFcfa or 0),
-            "margeNettePct": marge_i,
-            "clusterKMeans": int(kmeans_labels[i]),
-            "cluster": int(kmeans_labels[i]),
-            "dbscanLabel": int(dbscan_labels[i]),
-            "isOutlier": bool(is_outlier),
-            "similarItems": similar_items
+            "puContratFcfaArrondi": ligne.puContratFcfaArrondi,
+            "montantFcfa": ligne.montantFcfa,
+            "margeNettePct": ligne.margeNettePct,
+            "clusterKMeans": int(labels[i]),
+            "dbscanCluster": int(dbscan_labels[i]),
+            "isOutlier": bool(dbscan_labels[i] == -1),
+            "similarItems": similar_items[:5]
         })
-
-    # =========================
-    # GROUPER PAR CLUSTER
-    # =========================
 
     clusters = []
 
-    for cluster_id in sorted(set(kmeans_labels)):
-        items = [
-            item for item in results
-            if item["clusterKMeans"] == int(cluster_id)
-        ]
+    for cluster_id in sorted(set(labels)):
+        items = [r for r in results if r["clusterKMeans"] == int(cluster_id)]
 
         clusters.append({
             "cluster": int(cluster_id),
@@ -1179,14 +1148,11 @@ def predict_margin(data: MarginPredictionRequest):
             "items": items
         })
 
-    outliers = [
-        item for item in results
-        if item["isOutlier"]
-    ]
+    outliers = [r for r in results if r["isOutlier"]]
 
     return {
         "success": True,
-        "model": "Sentence Transformers + KMeans + DBSCAN",
+        "model": "TF-IDF + KMeans + DBSCAN",
         "totalLignes": len(results),
         "nombreClusters": len(clusters),
         "nombreOutliers": len(outliers),
@@ -1194,7 +1160,6 @@ def predict_margin(data: MarginPredictionRequest):
         "outliers": outliers,
         "results": results
     }
-
 # =========================
 # LANCEMENT
 # =========================
