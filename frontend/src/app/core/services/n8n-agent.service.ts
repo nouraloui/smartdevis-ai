@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface N8nAgentRequest {
   message: string;
@@ -23,7 +24,7 @@ export interface N8nAgentResponse {
   providedIn: 'root'
 })
 export class N8nAgentService {
-  private readonly apiUrl = '/api/n8n-agent';
+  private readonly apiUrl = `${environment.apiUrl}/n8n-agent`;
 
   constructor(private http: HttpClient) {}
 
