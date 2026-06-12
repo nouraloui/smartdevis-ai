@@ -10,31 +10,27 @@ const toNumber = (value, fallback = 0) => {
 exports.detectAnomaly = async (data) => {
   const pu = toNumber(data.pu_fcfa);
   const quantite = toNumber(data.quantite, 1);
-  const montant = toNumber(data.montant_fcfa);
+  const montant = toNumber(data.montant_fcfa, pu * quantite);
 
-  const response = await axios.post(`${IA_SERVICE_URL}/detect-anomaly`, {
+  const payload = {
     pu_fcfa: pu,
     quantite,
     montant_fcfa: montant,
+    prix_revient_fcfa: toNumber(data.prix_revient_fcfa),
+    frais_gestion_pct: toNumber(data.frais_gestion_pct, 5),
+    marge_nette_pct: toNumber(data.marge_nette_pct),
+    code_categorie: toNumber(data.code_categorie || data.categorie_code, 1),
+    categorie_code: toNumber(data.categorie_code || data.code_categorie, 1),
     code_projet: data.code_projet || 'ALL'
-  });
-
-  const result = response.data || {};
-
-  if (pu > 10000000) {
-    return {
-      ...result,
-      anomalie: true,
-      message: 'PU FCFA anormalement élevé selon la règle métier.',
-      score: result.score || 1,
-      source_decision: 'regle_metier'
-    };
-  }
-
-  return {
-    ...result,
-    source_decision: 'modele_ia'
   };
+
+  try {
+    const response = await axios.post(`${IA_SERVICE_URL}/detect-anomaly`, payload);
+    return response.data;
+  } catch (err) {
+    console.error('Erreur IA detect-anomaly:', err.response?.data || err.message);
+    throw err;
+  }
 };
 
 exports.riskScore = async (data) => {
@@ -45,7 +41,7 @@ exports.riskScore = async (data) => {
   const prixRevient = toNumber(data.prix_revient_fcfa);
   const fraisGestionPct = toNumber(data.frais_gestion_pct, 5);
   const margeNettePct = toNumber(data.marge_nette_pct);
-  const categorieCode = toNumber(data.categorie_code, 1);
+  const categorieCode = toNumber(data.categorie_code || data.code_categorie, 1);
 
   let score = 0;
   const causes = [];
@@ -110,14 +106,21 @@ exports.riskScore = async (data) => {
 };
 
 exports.suggestValues = async (data) => {
-  const response = await axios.post(`${IA_SERVICE_URL}/suggest-values`, {
+  const payload = {
     quantite: toNumber(data.quantite, 1),
     prix_revient_fcfa: toNumber(data.prix_revient_fcfa),
-    categorie_code: toNumber(data.categorie_code, 1),
+    code_categorie: toNumber(data.code_categorie || data.categorie_code, 1),
+    categorie_code: toNumber(data.categorie_code || data.code_categorie, 1),
     code_projet: data.code_projet || 'ALL'
-  });
+  };
 
-  return response.data;
+  try {
+    const response = await axios.post(`${IA_SERVICE_URL}/suggest-values`, payload);
+    return response.data;
+  } catch (err) {
+    console.error('Erreur IA suggest-values:', err.response?.data || err.message);
+    throw err;
+  }
 };
 
 exports.predictMargin = async (data) => {
@@ -125,55 +128,17 @@ exports.predictMargin = async (data) => {
   const quantite = toNumber(data.quantite, 1);
   const prixRevient = toNumber(data.prix_revient_fcfa);
   const fraisGestionPct = toNumber(data.frais_gestion_pct, 5);
-  const categorieCode = toNumber(data.categorie_code, 1);
-
-  const montant = pu * quantite;
-  const fraisGestion = prixRevient * (fraisGestionPct / 100);
-  const margeNette = montant - prixRevient - fraisGestion;
-
-  const margeNettePct =
-    montant > 0 ? (margeNette / montant) * 100 : 0;
+  const categorieCode = toNumber(data.categorie_code || data.code_categorie, 1);
 
   const response = await axios.post(`${IA_SERVICE_URL}/predict-margin`, {
     pu_fcfa: pu,
     quantite,
     prix_revient_fcfa: prixRevient,
     frais_gestion_pct: fraisGestionPct,
+    code_categorie: categorieCode,
     categorie_code: categorieCode,
     code_projet: data.code_projet || 'ALL'
   });
 
-  const iaResult = response.data || {};
-
-  let niveau = 'Bonne';
-  let decision = 'Valider';
-  let message = 'La marge prédite est correcte.';
-
-  if (margeNettePct < 0) {
-    niveau = 'Déficitaire';
-    decision = 'Réviser avant validation';
-    message = 'La marge nette calculée est négative. Le devis présente un risque financier.';
-  } else if (margeNettePct < 5) {
-    niveau = 'Faible';
-    decision = 'Valider avec prudence';
-    message = 'La marge nette est positive mais très faible. Le devis doit être vérifié.';
-  } else if (margeNettePct < 10) {
-    niveau = 'Acceptable';
-    decision = 'Valider avec suivi';
-    message = 'La marge nette est acceptable mais reste à surveiller.';
-  }
-
-  return {
-    ...iaResult,
-    marge_predite_pct: Number(margeNettePct.toFixed(2)),
-    niveau,
-    decision,
-    message,
-    score_confiance:
-      iaResult.score_confiance ??
-      iaResult.score_confiance_pct ??
-      iaResult.confidence ??
-      85,
-    source_decision: 'regle_metier_et_ia'
-  };
+  return response.data;
 };

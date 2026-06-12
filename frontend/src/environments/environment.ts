@@ -1,4 +1,4 @@
 export const environment = {
-  production: false,
+  production: true,
   apiUrl: 'https://smartdevis-backend.onrender.com/api'
 };
