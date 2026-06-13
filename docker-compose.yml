@@ -32,6 +32,16 @@ services:
           - n8n
           - smartdevis_n8n
 
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: smartdevis_cloudflared
+    restart: always
+    command: tunnel --no-autoupdate --url http://n8n:5678
+    depends_on:
+      - n8n
+    networks:
+      - smartdevis_net
+
   backend:
     build: ./backend
     container_name: smartdevis_backend

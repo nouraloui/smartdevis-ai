@@ -21,7 +21,6 @@ const assistantRoutes = require('./routes/assistant.routes');
 const n8nAgentRoutes = require('./routes/n8n-agent.routes');
 
 const app = express();
-app.set('trust proxy', 1);
 
 // ── Sécurité ──────────────────────────────────────────────────
 // app.use(helmet());

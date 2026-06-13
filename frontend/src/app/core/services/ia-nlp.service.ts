@@ -8,8 +8,7 @@ import { environment } from '../../../environments/environment';
 })
 export class IaNlpService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/ia-nlp`;
-
+  private apiUrl = `${environment.iaApiUrl}/ia-nlp`;
   semanticAnalysis(nClusters = 6, codeProjet = 'ALL'): Observable<any> {
     return this.http.post(`${this.apiUrl}/semantic-analysis`, {
       n_clusters: nClusters,

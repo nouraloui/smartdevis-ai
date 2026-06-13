@@ -6,7 +6,11 @@ let pool = null;
 
 const connectMySQL = async () => {
   try {
-   
+
+    console.log('MYSQL_HOST =', process.env.MYSQL_HOST);
+    console.log('MYSQL_PORT =', process.env.MYSQL_PORT);
+    console.log('MYSQL_USER =', process.env.MYSQL_USER);
+    console.log('MYSQL_DATABASE =', process.env.MYSQL_DATABASE);
 
     pool = mysql.createPool({
       host: process.env.MYSQL_HOST || 'localhost',
@@ -20,7 +24,9 @@ const connectMySQL = async () => {
       queueLimit: 0,
 
       enableKeepAlive: true,
-      keepAliveInitialDelay: 10000
+      keepAliveInitialDelay: 10000,
+
+      connectTimeout: 30000
     });
 
     const connection = await pool.getConnection();
@@ -32,16 +38,17 @@ const connectMySQL = async () => {
     connection.release();
 
     console.log('✅ MySQL connecté');
-    console.log(
-      '📊 Base active :',
-      rows[0]?.current_database
-    );
+    console.log('📊 Base active :', rows[0]?.current_database);
 
     return pool;
 
   } catch (err) {
+
     console.error('❌ Erreur connexion MySQL');
-    console.error(err.message);
+    console.error('Message :', err.message);
+    console.error('Code :', err.code);
+    console.error('Errno :', err.errno);
+
     throw err;
   }
 };

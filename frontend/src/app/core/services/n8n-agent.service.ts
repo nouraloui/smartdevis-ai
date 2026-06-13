@@ -24,7 +24,7 @@ export interface N8nAgentResponse {
   providedIn: 'root'
 })
 export class N8nAgentService {
-  private readonly apiUrl = `${environment.apiUrl}/n8n-agent`;
+ private readonly apiUrl = `${environment.n8nApiUrl}/n8n-agent`;  
 
   constructor(private http: HttpClient) {}
 

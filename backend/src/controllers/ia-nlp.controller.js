@@ -102,17 +102,14 @@ const semanticAnalysis = async (req, res, next) => {
     });
 
     return res.json(iaResponse.data);
-  }  catch (err) {
-    console.error('Erreur IA NLP URL:', IA_SERVICE_URL);
-    console.error('Erreur IA NLP status:', err.response?.status);
-    console.error('Erreur IA NLP data:', JSON.stringify(err.response?.data, null, 2));
-    console.error('Erreur IA NLP message:', err.message);
+  } catch (err) {
+    console.error('Erreur IA NLP:', err.response?.data || err.message);
 
     return res.status(err.response?.status || 500).json({
       success: false,
       message:
-        err.response?.data?.message ||
         err.response?.data?.detail ||
+        err.response?.data?.message ||
         err.message ||
         'Erreur serveur interne'
     });

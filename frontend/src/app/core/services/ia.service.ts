@@ -8,8 +8,7 @@ import { environment } from '../../../environments/environment';
 })
 export class IaService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/ia`;
-
+  private apiUrl = `${environment.iaApiUrl}/ia`;
   detectAnomaly(data: {
     pu_fcfa: number;
     quantite: number;
