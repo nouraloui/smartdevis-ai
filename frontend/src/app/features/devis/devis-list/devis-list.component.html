@@ -90,7 +90,7 @@
   <p class="loading" *ngIf="loading">Chargement des devis...</p>
   <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
 
-  <div class="table-card" *ngIf="!loading && filteredDevis.length > 0">
+  <div class="table-card desktop-table" *ngIf="!loading && filteredDevis.length > 0">
     <div class="table-header">
       <div>
         <h3>Lignes de devis</h3>
@@ -108,11 +108,9 @@
             <th rowspan="2">Sous-catégorie</th>
             <th rowspan="2">Unité</th>
             <th rowspan="2">Quantité</th>
-
             <th colspan="2">Contrat</th>
             <th colspan="2">Montant</th>
             <th colspan="3">Prix de revient</th>
-
             <th rowspan="2">Marge brute</th>
             <th colspan="2">Frais de gestion</th>
             <th colspan="2">Marge nette</th>
@@ -123,17 +121,13 @@
           <tr>
             <th>PU arrondi FCFA</th>
             <th>PU exact FCFA</th>
-
             <th>FCFA</th>
             <th>EUR</th>
-
             <th>Qté site</th>
             <th>PU site EUR</th>
             <th>Prix Euro</th>
-
             <th>Euro</th>
             <th>%</th>
-
             <th>Euro</th>
             <th>%</th>
           </tr>
@@ -266,6 +260,85 @@
           </ng-template>
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <div class="mobile-devis-list" *ngIf="!loading && filteredDevis.length > 0">
+    <div class="mobile-list-header">
+      <h3>Lignes de devis</h3>
+      <span>{{ filteredDevis.length }} ligne(s)</span>
+    </div>
+
+    <div
+      class="mobile-devis-card"
+      *ngFor="let d of filteredDevis"
+      [class.mobile-parent]="d.ligneType === 'categorie'"
+      [class.mobile-child]="d.ligneType === 'sous_categorie'"
+    >
+      <div class="mobile-card-top">
+        <div>
+          <span class="section-pill">Section {{ d.section || '-' }}</span>
+          <h4>{{ d.designation || d.categorie || 'Ligne de devis' }}</h4>
+          <p>{{ d.categorie || '-' }}</p>
+        </div>
+
+        <span class="status">{{ d.statut }}</span>
+      </div>
+
+      <div class="mobile-subcategory" *ngIf="d.sousCategorie">
+        {{ d.sousCategorie }}
+      </div>
+
+      <div class="mobile-info-grid">
+        <div>
+          <span>Unité</span>
+          <strong>{{ d.unite || '-' }}</strong>
+        </div>
+
+        <div>
+          <span>Quantité</span>
+          <strong>{{ d.ligneType !== 'sous_categorie' ? (d.quantite || 0) : '-' }}</strong>
+        </div>
+
+        <div>
+          <span>PU FCFA</span>
+          <strong>
+            {{ d.ligneType !== 'sous_categorie' ? (d.puContratFcfaArrondi || 0 | number:'1.0-0') : '-' }}
+          </strong>
+        </div>
+
+        <div>
+          <span>Montant FCFA</span>
+          <strong>
+            {{ d.ligneType !== 'sous_categorie' ? (d.montantFcfa || 0 | number:'1.0-0') : '-' }}
+          </strong>
+        </div>
+
+        <div>
+          <span>Prix revient EUR</span>
+          <strong>{{ d.prixRevientEur || 0 | number:'1.0-0' }}</strong>
+        </div>
+
+        <div>
+          <span>Marge nette</span>
+          <strong
+            [class.positive-text]="(d.margeNettePct || 0) >= 0"
+            [class.negative-text]="(d.margeNettePct || 0) < 0"
+          >
+            {{ d.ligneType !== 'sous_categorie' ? (d.margeNettePct || 0 | number:'1.0-2') + '%' : '-' }}
+          </strong>
+        </div>
+      </div>
+
+      <div class="mobile-actions">
+        <button class="btn-edit" type="button" (click)="goToEdit(d._id)">
+          Modifier
+        </button>
+
+        <button class="btn-delete" type="button" (click)="delete(d._id)">
+          Supprimer
+        </button>
+      </div>
     </div>
   </div>
 

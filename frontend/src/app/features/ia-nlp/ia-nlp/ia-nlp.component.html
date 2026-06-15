@@ -2,31 +2,80 @@
   <div class="page-header">
     <div>
       <h2>Analyse sémantique IA</h2>
-      <p>Regroupement automatique des prestations</p>
+      <p>Regroupement automatique des prestations par similarité textuelle.</p>
     </div>
   </div>
 
   <div class="config-card">
-    <div>
-      <label>Projet / Dataset</label>
-      <select [(ngModel)]="codeProjet">
-        <option *ngFor="let p of projets" [value]="p.value">
-          {{ p.label }}
-        </option>
-      </select>
+    <div class="config-title">
+      <h3>Configuration de l’analyse NLP</h3>
+      <p>Sélectionnez un projet et le nombre de groupes à détecter.</p>
     </div>
 
-    <div>
-      <label>Nombre de clusters KMeans</label>
-      <input type="number" [(ngModel)]="nClusters" min="2" max="20" />
-    </div>
+    <div class="config-form">
+      <div class="form-group">
+        <label for="codeProjet">Projet</label>
 
-    <button class="btn-primary" (click)="lancerAnalyse()" [disabled]="loading">
-      {{ loading ? 'Analyse en cours...' : 'Lancer analyse NLP' }}
-    </button>
+        <select
+          id="codeProjet"
+          [(ngModel)]="codeProjet"
+          aria-label="Sélectionner un projet"
+        >
+          <option *ngFor="let p of projets" [value]="p.value">
+            {{ p.label }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="nClusters">Nombre de clusters KMeans</label>
+
+        <input
+          id="nClusters"
+          type="number"
+          [(ngModel)]="nClusters"
+          min="2"
+          max="20"
+          aria-label="Nombre de clusters KMeans"
+        />
+      </div>
+
+      <button
+        class="btn-primary"
+        type="button"
+        (click)="lancerAnalyse()"
+        [disabled]="loading"
+        aria-label="Lancer analyse NLP"
+      >
+        {{ loading ? 'Analyse en cours...' : 'Lancer analyse NLP' }}
+      </button>
+    </div>
   </div>
 
   <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+  <div class="nlp-empty-card" *ngIf="!result && !loading && !errorMessage">
+    <div class="empty-icon">✨</div>
+
+    <div>
+      <h3>Analyse NLP prête</h3>
+      <p>
+        Sélectionnez un projet précis, choisissez le nombre de clusters, puis lancez
+        l’analyse pour afficher les regroupements, les prestations isolées et les similarités.
+      </p>
+    </div>
+  </div>
+
+  <div class="nlp-loading-card" *ngIf="loading">
+    <div class="loader"></div>
+
+    <div>
+      <h3>Analyse en cours...</h3>
+      <p>
+        Le service IA analyse les prestations et calcule les regroupements sémantiques.
+      </p>
+    </div>
+  </div>
 
   <div class="summary-grid" *ngIf="result">
     <div class="summary-card">
@@ -51,21 +100,37 @@
   </div>
 
   <div class="tabs" *ngIf="result">
-    <button [class.active]="selectedTab === 'clusters'" (click)="selectedTab = 'clusters'">
+    <button
+      type="button"
+      [class.active]="selectedTab === 'clusters'"
+      (click)="selectedTab = 'clusters'"
+    >
       Clusters
     </button>
 
-    <button [class.active]="selectedTab === 'outliers'" (click)="selectedTab = 'outliers'">
+    <button
+      type="button"
+      [class.active]="selectedTab === 'outliers'"
+      (click)="selectedTab = 'outliers'"
+    >
       Prestations isolées
     </button>
 
-    <button [class.active]="selectedTab === 'similarities'" (click)="selectedTab = 'similarities'">
+    <button
+      type="button"
+      [class.active]="selectedTab === 'similarities'"
+      (click)="selectedTab = 'similarities'"
+    >
       Similarités
     </button>
   </div>
 
+  <!-- ================= CLUSTERS ================= -->
   <div class="section-card" *ngIf="result && selectedTab === 'clusters'">
-    <h3>Regroupement automatique des prestations</h3>
+    <div class="section-title">
+      <h3>Regroupement automatique des prestations</h3>
+      <p>Les prestations sont regroupées selon leur similarité sémantique.</p>
+    </div>
 
     <div class="cluster-card" *ngFor="let cluster of result.clusters">
       <div class="cluster-header">
@@ -103,17 +168,36 @@
     </div>
   </div>
 
+  <!-- ================= OUTLIERS ================= -->
   <div class="section-card" *ngIf="result && selectedTab === 'outliers'">
-    <h3>Prestations isolées détectées par DBSCAN</h3>
+    <div class="section-title">
+      <h3>Prestations isolées détectées par DBSCAN</h3>
+      <p>Ces prestations sont sémantiquement différentes du reste des lignes.</p>
+    </div>
+
+    <div class="empty-state" *ngIf="result.outliers?.length === 0">
+      Aucune prestation isolée détectée.
+    </div>
 
     <div class="alert-card" *ngFor="let item of result.outliers">
       <h4>{{ item.categorie }}</h4>
       <p>{{ item.sousCategorie }}</p>
 
       <div class="alert-grid">
-        <span>PU FCFA : <strong>{{ item.puContratFcfaArrondi || 0 | number:'1.0-0' }}</strong></span>
-        <span>Marge : <strong>{{ item.margeNettePct || 0 | number:'1.0-2' }}%</strong></span>
-        <span>Cluster KMeans : <strong>{{ item.clusterKMeans }}</strong></span>
+        <span>
+          PU FCFA
+          <strong>{{ item.puContratFcfaArrondi || 0 | number:'1.0-0' }}</strong>
+        </span>
+
+        <span>
+          Marge
+          <strong>{{ item.margeNettePct || 0 | number:'1.0-2' }}%</strong>
+        </span>
+
+        <span>
+          Cluster KMeans
+          <strong>{{ item.clusterKMeans }}</strong>
+        </span>
       </div>
 
       <p class="decision">
@@ -122,15 +206,23 @@
     </div>
   </div>
 
+  <!-- ================= SIMILARITIES ================= -->
   <div class="section-card" *ngIf="result && selectedTab === 'similarities'">
-    <h3>Prestations similaires avec écart de prix</h3>
+    <div class="section-title">
+      <h3>Prestations similaires avec écart de prix</h3>
+      <p>Comparaison des lignes proches avec un écart potentiel de prix.</p>
+    </div>
+
+    <div class="empty-state" *ngIf="lignesAvecSimilarites.length === 0">
+      Aucune similarité significative détectée.
+    </div>
 
     <div class="similarity-card" *ngFor="let item of lignesAvecSimilarites">
       <h4>{{ item.categorie }}</h4>
       <p>{{ item.sousCategorie }}</p>
 
       <div class="similar-item" *ngFor="let sim of item.similarItems">
-        <div>
+        <div class="similar-description">
           <strong>{{ sim.categorie }}</strong>
           <p>{{ sim.sousCategorie }}</p>
         </div>

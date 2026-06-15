@@ -1,8 +1,11 @@
 <div class="agent-page">
-
   <div class="agent-header">
     <div>
       <h1>Assistant IA SmartDevis</h1>
+      <p>
+        Agent conversationnel connecté à n8n pour analyser les devis, les coûts,
+        les marges et les anomalies.
+      </p>
     </div>
 
     <div class="status" [class.online]="agentOnline" [class.offline]="!agentOnline">
@@ -12,28 +15,35 @@
   </div>
 
   <div class="agent-layout">
-
     <aside class="suggestions-card">
-      <h3>Questions rapides</h3>
+      <div class="suggestions-header">
+        <h3>Questions rapides</h3>
+        <p>Sélectionnez une question pour démarrer rapidement.</p>
+      </div>
 
-      <button
-        *ngFor="let suggestion of suggestions"
-        type="button"
-        (click)="sendSuggestion(suggestion)">
-        {{ suggestion }}
-      </button>
+      <div class="suggestions-list">
+        <button
+          *ngFor="let suggestion of suggestions"
+          type="button"
+          (click)="sendSuggestion(suggestion)"
+        >
+          {{ suggestion }}
+        </button>
+      </div>
 
       <button type="button" class="clear-btn" (click)="clearChat()">
-        Réinitialiser
+        Réinitialiser la conversation
       </button>
     </aside>
 
     <section class="chat-card">
-
       <div class="chat-header">
         <div>
           <h2>DevisAssistant</h2>
+          <p>Posez une question sur vos projets, devis, coûts ou marges.</p>
         </div>
+
+        <span class="chat-badge">SmartDevis AI</span>
       </div>
 
       <div class="error-box" *ngIf="errorMessage">
@@ -41,13 +51,12 @@
       </div>
 
       <div class="chat-messages">
-
         <div
           *ngFor="let msg of messages"
           class="message-row"
           [class.user-row]="msg.sender === 'user'"
-          [class.agent-row]="msg.sender === 'agent'">
-
+          [class.agent-row]="msg.sender === 'agent'"
+        >
           <div class="message-bubble">
             <div class="message-author">
               {{ msg.sender === 'user' ? 'Vous' : 'SmartDevis AI' }}
@@ -61,12 +70,12 @@
               {{ msg.time | date:'HH:mm' }}
             </div>
           </div>
-
         </div>
 
         <div class="message-row agent-row" *ngIf="loading">
           <div class="message-bubble loading-bubble">
             <div class="message-author">SmartDevis AI</div>
+
             <div class="typing">
               Analyse en cours
               <span></span>
@@ -75,7 +84,6 @@
             </div>
           </div>
         </div>
-
       </div>
 
       <div class="chat-input">
@@ -84,18 +92,19 @@
           [(ngModel)]="userMessage"
           placeholder="Posez une question sur les devis..."
           (keyup.enter)="sendMessage()"
-          [disabled]="loading">
+          [disabled]="loading"
+          aria-label="Message à envoyer à l'agent IA"
+        />
 
         <button
           type="button"
           (click)="sendMessage()"
-          [disabled]="loading || !userMessage.trim()">
+          [disabled]="loading || !userMessage.trim()"
+          aria-label="Envoyer le message"
+        >
           {{ loading ? 'Analyse...' : 'Envoyer' }}
         </button>
       </div>
-
     </section>
-
   </div>
-
 </div>

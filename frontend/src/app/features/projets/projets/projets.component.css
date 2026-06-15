@@ -4,45 +4,72 @@
   --africa-gray: #6f6a6d;
   --africa-gray-light: #e8e6e7;
   --africa-dark: #0f172a;
-  --africa-bg: #f5f5f5;
+  --africa-muted: #64748b;
+  --africa-bg: #f5f7fa;
+  display: block;
+  width: 100%;
+  min-width: 0;
 }
+
+/* ===============================
+   LAYOUT FULL WIDTH
+================================ */
 
 .projets-layout {
   display: grid;
-  grid-template-columns: 260px 1fr;
+  grid-template-columns: 280px minmax(0, 1fr);
   min-height: calc(100vh - 78px);
-  background: #f1f5f9;
+  background: var(--africa-bg);
+  width: 100%;
+  min-width: 0;
 }
 
 /* ===============================
    SIDEBAR
 ================================ */
+
 .projets-sidebar {
-  background: white;
+  background: #ffffff;
   border-right: 1px solid var(--africa-gray-light);
   padding: 24px 18px;
   box-shadow: 8px 0 24px rgba(15, 23, 42, 0.04);
+  min-width: 0;
 }
 
-.projets-sidebar h3 {
-  margin: 0 0 18px;
+.sidebar-title {
+  padding: 12px 12px 18px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 18px;
+}
+
+.sidebar-title h3 {
+  margin: 0 0 6px;
   color: var(--africa-dark);
-  font-size: 22px;
+  font-size: 23px;
   font-weight: 900;
+}
+
+.sidebar-title p {
+  margin: 0;
+  color: var(--africa-muted);
+  font-size: 13px;
 }
 
 .sidebar-link {
   width: 100%;
-  background: white;
+  background: #ffffff;
   color: var(--africa-dark);
   border: 1px solid var(--africa-gray-light);
-  padding: 14px 16px;
-  border-radius: 14px;
+  padding: 14px;
+  border-radius: 16px;
   text-align: left;
   font-weight: 800;
   cursor: pointer;
   margin-bottom: 12px;
   transition: 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .sidebar-link:hover {
@@ -52,56 +79,89 @@
 }
 
 .sidebar-link.active {
-  background: var(--africa-red);
-  border-color: var(--africa-red);
-  color: white;
-  box-shadow: 0 10px 20px rgba(199, 53, 46, 0.2);
+  background: rgba(199, 53, 46, 0.1);
+  border-color: rgba(199, 53, 46, 0.35);
+  color: var(--africa-red);
+  box-shadow: 0 10px 22px rgba(199, 53, 46, 0.1);
+}
+
+.sidebar-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sidebar-link strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.sidebar-link small {
+  display: block;
+  color: var(--africa-muted);
+  font-size: 11px;
+  margin-top: 3px;
 }
 
 /* ===============================
    CONTENT
 ================================ */
+
 .projets-content {
-  padding: 24px;
+  padding: 28px 34px;
+  min-width: 0;
+  width: 100%;
 }
 
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 18px;
   margin-bottom: 24px;
 }
 
 .page-header h1 {
   margin: 0 0 6px;
   color: var(--africa-dark);
-  font-size: 30px;
+  font-size: 32px;
   font-weight: 900;
+  letter-spacing: -0.4px;
 }
 
 .page-header p {
   margin: 0;
-  color: #64748b;
+  color: var(--africa-muted);
+  font-size: 15px;
 }
 
 /* ===============================
    BUTTONS
 ================================ */
+
 .btn-add,
 .btn-save {
   background: var(--africa-red);
   color: white;
   border: none;
   padding: 12px 18px;
-  border-radius: 10px;
-  font-weight: 800;
+  border-radius: 12px;
+  font-weight: 900;
   cursor: pointer;
   transition: 0.2s ease;
+  white-space: nowrap;
 }
 
 .btn-add:hover,
 .btn-save:hover {
   background: var(--africa-red-dark);
+  transform: translateY(-1px);
 }
 
 .btn-back,
@@ -110,8 +170,8 @@
   color: var(--africa-red);
   border: 1px solid var(--africa-red);
   padding: 11px 17px;
-  border-radius: 10px;
-  font-weight: 800;
+  border-radius: 12px;
+  font-weight: 900;
   cursor: pointer;
   transition: 0.2s ease;
 }
@@ -121,15 +181,22 @@
   background: #fff7f6;
 }
 
+.btn-devis,
+.btn-create-devis,
+.btn-edit,
+.btn-delete {
+  border-radius: 12px;
+  padding: 10px 13px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: 0.2s ease;
+  font-size: 13px;
+}
+
 .btn-devis {
   background: var(--africa-dark);
   color: white;
   border: 1px solid var(--africa-dark);
-  border-radius: 10px;
-  padding: 9px 13px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: 0.2s ease;
 }
 
 .btn-devis:hover {
@@ -140,11 +207,6 @@
   background: white;
   color: var(--africa-red);
   border: 1px solid var(--africa-red);
-  border-radius: 10px;
-  padding: 9px 13px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: 0.2s ease;
 }
 
 .btn-create-devis:hover {
@@ -155,11 +217,6 @@
   background: white;
   color: var(--africa-dark);
   border: 1px solid var(--africa-dark);
-  border-radius: 10px;
-  padding: 9px 13px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: 0.2s ease;
 }
 
 .btn-edit:hover {
@@ -167,14 +224,9 @@
 }
 
 .btn-delete {
-  background: white;
+  background: #fff;
   color: var(--africa-red);
   border: 1px solid var(--africa-red);
-  border-radius: 10px;
-  padding: 9px 13px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: 0.2s ease;
 }
 
 .btn-delete:hover {
@@ -184,32 +236,36 @@
 /* ===============================
    KPI
 ================================ */
+
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
   margin-bottom: 22px;
 }
 
 .kpi-card {
-  background: white;
-  border-radius: 18px;
+  background: #ffffff;
+  border-radius: 20px;
   padding: 22px;
-  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
-  border-left: 5px solid var(--africa-gray);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+  border-left: 5px solid var(--africa-dark);
+  min-width: 0;
 }
 
 .kpi-card span {
   display: block;
-  color: #64748b;
-  font-weight: 700;
+  color: var(--africa-muted);
+  font-weight: 800;
   margin-bottom: 10px;
 }
 
 .kpi-card strong {
+  display: block;
   color: var(--africa-dark);
-  font-size: 22px;
+  font-size: 23px;
   font-weight: 900;
+  word-break: break-word;
 }
 
 .kpi-card.danger {
@@ -221,24 +277,43 @@
 }
 
 /* ===============================
-   TOOLBAR + FORM CARD
+   TOOLBAR
 ================================ */
-.toolbar,
-.form-card {
-  background: white;
-  border-radius: 18px;
-  padding: 18px;
+
+.toolbar {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 20px;
   margin-bottom: 22px;
-  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+  display: grid;
+  grid-template-columns: minmax(260px, 0.8fr) minmax(280px, 1.2fr);
+  gap: 18px;
+  align-items: center;
+}
+
+.toolbar h3 {
+  margin: 0 0 5px;
+  color: var(--africa-dark);
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.toolbar p {
+  margin: 0;
+  color: var(--africa-muted);
+  font-size: 14px;
 }
 
 .toolbar input {
   width: 100%;
+  height: 48px;
   padding: 13px 14px;
   border: 1px solid #cbd5e1;
-  border-radius: 12px;
+  border-radius: 14px;
   outline: none;
   box-sizing: border-box;
+  font-weight: 700;
 }
 
 .toolbar input:focus {
@@ -249,33 +324,41 @@
 /* ===============================
    PROJECT CARDS
 ================================ */
+
 .projects-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 22px;
 }
 
 .project-card {
-  background: white;
-  border-radius: 18px;
+  background: #ffffff;
+  border-radius: 22px;
   padding: 22px;
-  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
-  border-top: 5px solid var(--africa-gray);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+  border-top: 5px solid var(--africa-dark);
+  min-width: 0;
 }
 
 .project-top {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   gap: 14px;
   margin-bottom: 18px;
 }
 
+.project-main-info {
+  min-width: 0;
+}
+
 .project-code {
+  display: inline-flex;
   background: #f8d7d5;
   color: var(--africa-red-dark);
   padding: 6px 10px;
   border-radius: 999px;
-  font-weight: 800;
+  font-weight: 900;
   font-size: 13px;
 }
 
@@ -283,11 +366,13 @@
   margin: 12px 0 6px;
   color: var(--africa-dark);
   font-size: 22px;
+  font-weight: 900;
+  line-height: 1.2;
 }
 
 .project-top p {
   margin: 0;
-  color: #64748b;
+  color: var(--africa-muted);
 }
 
 .risk-badge {
@@ -296,8 +381,9 @@
   color: var(--africa-gray);
   padding: 7px 10px;
   border-radius: 999px;
-  font-weight: 800;
+  font-weight: 900;
   white-space: nowrap;
+  font-size: 12px;
 }
 
 .risk-medium {
@@ -313,27 +399,28 @@
 .project-info,
 .budget-box {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
   margin-bottom: 16px;
 }
 
 .budget-box {
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .project-info div,
 .budget-box div {
   background: #f8fafc;
-  border-radius: 14px;
+  border-radius: 16px;
   padding: 14px;
+  min-width: 0;
 }
 
 .project-info span,
 .budget-box span {
   display: block;
-  color: #64748b;
-  font-weight: 700;
+  color: var(--africa-muted);
+  font-weight: 800;
   font-size: 13px;
   margin-bottom: 6px;
 }
@@ -341,11 +428,14 @@
 .project-info strong,
 .budget-box strong {
   color: var(--africa-dark);
+  font-weight: 900;
+  word-break: break-word;
 }
 
 /* ===============================
    PROGRESS
 ================================ */
+
 .progress-section {
   margin-bottom: 18px;
 }
@@ -353,8 +443,9 @@
 .progress-label {
   display: flex;
   justify-content: space-between;
-  font-weight: 800;
+  font-weight: 900;
   margin-bottom: 8px;
+  color: var(--africa-dark);
 }
 
 .progress-track {
@@ -370,7 +461,7 @@
 }
 
 .progress-good {
-  background: var(--africa-gray);
+  background: #16a34a;
 }
 
 .progress-medium {
@@ -384,18 +475,62 @@
 /* ===============================
    ACTIONS
 ================================ */
+
 .project-actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, auto));
   gap: 10px;
-  flex-wrap: wrap;
+  align-items: center;
 }
 
 /* ===============================
    FORM
 ================================ */
+
+.form-card {
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 24px;
+  margin-bottom: 22px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+}
+
+.form-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 20px;
+}
+
+.form-card-header h3 {
+  margin: 0 0 6px;
+  color: var(--africa-dark);
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.form-card-header p {
+  margin: 0;
+  color: var(--africa-muted);
+}
+
+.form-badge {
+  background: rgba(199, 53, 46, 0.1);
+  color: var(--africa-red);
+  border: 1px solid rgba(199, 53, 46, 0.2);
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
 }
 
@@ -406,19 +541,29 @@
 .form-group label {
   display: block;
   margin-bottom: 7px;
-  font-weight: 800;
+  font-weight: 900;
   color: var(--africa-dark);
+  font-size: 13px;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
   width: 100%;
+  min-height: 46px;
   padding: 12px 14px;
   border: 1px solid #cbd5e1;
-  border-radius: 10px;
+  border-radius: 13px;
   outline: none;
   box-sizing: border-box;
+  background: #ffffff;
+  color: var(--africa-dark);
+  font-weight: 700;
+}
+
+.form-group textarea {
+  min-height: 110px;
+  resize: vertical;
 }
 
 .form-group input:focus,
@@ -429,63 +574,1014 @@
 }
 
 .form-actions {
-  margin-top: 18px;
+  margin-top: 20px;
   display: flex;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 /* ===============================
    MESSAGES
 ================================ */
-.error {
-  color: var(--africa-red);
+
+.error,
+.success {
+  border-radius: 14px;
+  padding: 12px 14px;
   font-weight: 900;
+  margin: 0 0 16px;
+}
+
+.error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
 }
 
 .success {
+  background: #dcfce7;
   color: #166534;
-  font-weight: 900;
+  border: 1px solid #bbf7d0;
 }
 
+.loading,
 .empty {
-  background: white;
-  padding: 24px;
-  border-radius: 16px;
-  color: #64748b;
+  background: #ffffff;
+  padding: 22px;
+  border-radius: 18px;
+  color: var(--africa-muted);
+  font-weight: 800;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
 }
 
 /* ===============================
-   RESPONSIVE
+   TABLET
 ================================ */
-@media (max-width: 1000px) {
+
+@media (max-width: 1200px) {
   .projets-layout {
+    grid-template-columns: 230px minmax(0, 1fr);
+  }
+
+  .projets-content {
+    padding: 22px;
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .projects-grid {
     grid-template-columns: 1fr;
   }
 
-  .projets-sidebar {
-    border-right: none;
-    border-bottom: 1px solid var(--africa-gray-light);
-  }
-
-  .kpi-grid,
-  .projects-grid,
-  .form-grid,
-  .project-info,
-  .budget-box {
-    grid-template-columns: 1fr;
-  }
-
-  .page-header,
-  .project-top {
-    flex-direction: column;
-    align-items: flex-start;
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .project-actions {
-    flex-direction: column;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .project-actions button {
     width: 100%;
+  }
+}
+
+/* ===============================
+   MOBILE
+================================ */
+
+@media (max-width: 768px) {
+  .projets-layout {
+    grid-template-columns: 76px minmax(0, 1fr);
+    min-height: calc(100vh - 70px);
+  }
+
+  .projets-sidebar {
+    padding: 10px 8px;
+    border-right: 1px solid #e5e7eb;
+    box-shadow: none;
+  }
+
+  .sidebar-title {
+    display: none;
+  }
+
+  .sidebar-link {
+    padding: 9px 6px;
+    border-radius: 14px;
+    justify-content: center;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+
+  .sidebar-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 16px;
+  }
+
+  .sidebar-link strong {
+    font-size: 10px;
+    line-height: 1.05;
+    text-align: center;
+  }
+
+  .sidebar-link small {
+    display: none;
+  }
+
+  .projets-content {
+    padding: 10px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .page-header h1 {
+    font-size: 22px;
+    line-height: 1.15;
+  }
+
+  .page-header p {
+    font-size: 12px;
+  }
+
+  .btn-add,
+  .btn-back {
+    width: 100%;
+    height: 40px;
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+    margin-bottom: 12px;
+  }
+
+  .kpi-card {
+    padding: 12px;
+    border-radius: 16px;
+    border-left-width: 4px;
+  }
+
+  .kpi-card span {
+    font-size: 10.5px;
+    margin-bottom: 5px;
+  }
+
+  .kpi-card strong {
+    font-size: 15px;
+  }
+
+  .toolbar {
+    padding: 12px;
+    border-radius: 16px;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .toolbar h3 {
+    font-size: 16px;
+  }
+
+  .toolbar p {
+    font-size: 11px;
+  }
+
+  .toolbar input {
+    height: 38px;
+    font-size: 12px;
+    border-radius: 12px;
+  }
+
+  .projects-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .project-card {
+    padding: 13px;
+    border-radius: 18px;
+  }
+
+  .project-top {
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .project-code {
+    font-size: 11px;
+    padding: 5px 8px;
+  }
+
+  .project-top h3 {
+    font-size: 17px;
+    margin: 9px 0 4px;
+  }
+
+  .project-top p {
+    font-size: 12px;
+  }
+
+  .risk-badge {
+    font-size: 10.5px;
+    padding: 6px 8px;
+  }
+
+  .project-info {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-bottom: 9px;
+  }
+
+  .budget-box {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .project-info div,
+  .budget-box div {
+    padding: 10px;
+    border-radius: 13px;
+  }
+
+  .project-info span,
+  .budget-box span {
+    font-size: 10.5px;
+    margin-bottom: 4px;
+  }
+
+  .project-info strong,
+  .budget-box strong {
+    font-size: 12px;
+  }
+
+  .progress-section {
+    margin-bottom: 12px;
+  }
+
+  .progress-label {
+    font-size: 12px;
+  }
+
+  .progress-track {
+    height: 9px;
+  }
+
+  .project-actions {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .project-actions button {
+    width: 100%;
+    height: 36px;
+    padding: 7px 9px;
+    border-radius: 11px;
+    font-size: 11px;
+  }
+
+  .form-card {
+    padding: 12px;
+    border-radius: 18px;
+  }
+
+  .form-card-header {
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+  }
+
+  .form-card-header h3 {
+    font-size: 17px;
+  }
+
+  .form-card-header p {
+    font-size: 12px;
+  }
+
+  .form-badge {
+    font-size: 10.5px;
+    padding: 6px 9px;
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .form-group.full {
+    grid-column: 1 / -1;
+  }
+
+  .form-group label {
+    font-size: 10.5px;
+    margin-bottom: 4px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    min-height: 35px;
+    padding: 6px 8px;
+    border-radius: 10px;
+    font-size: 11.5px;
+  }
+
+  .form-group textarea {
+    min-height: 80px;
+  }
+
+  .form-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .btn-save,
+  .btn-cancel {
+    width: 100%;
+    height: 38px;
+    padding: 8px;
+    font-size: 11.5px;
+  }
+
+  .error,
+  .success {
+    padding: 9px;
+    font-size: 11.5px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+  }
+
+  .loading,
+  .empty {
+    padding: 14px;
+    font-size: 12px;
+    border-radius: 14px;
+  }
+}
+
+/* ===============================
+   VERY SMALL MOBILE
+================================ */
+
+@media (max-width: 420px) {
+  .projets-layout {
+    grid-template-columns: 70px minmax(0, 1fr);
+  }
+
+  .projets-content {
+    padding: 8px;
+  }
+
+  .sidebar-link strong {
+    font-size: 9.5px;
+  }
+
+  .kpi-card strong {
+    font-size: 14px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* ===================================================== */
+/* PROJETS - MOBILE COMPACT FINAL */
+/* À METTRE TOUT À LA FIN DE projets.component.css */
+/* ===================================================== */
+
+@media (max-width: 768px) {
+  .projets-layout {
+    grid-template-columns: 62px minmax(0, 1fr) !important;
+    min-height: calc(100vh - 70px) !important;
+  }
+
+  .projets-sidebar {
+    padding: 8px 5px !important;
+  }
+
+  .sidebar-link {
+    padding: 7px 4px !important;
+    margin-bottom: 8px !important;
+    border-radius: 12px !important;
+    gap: 4px !important;
+  }
+
+  .sidebar-icon {
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 14px !important;
+    border-radius: 10px !important;
+  }
+
+  .sidebar-link strong {
+    font-size: 8.5px !important;
+    line-height: 1 !important;
+  }
+
+  .projets-content {
+    padding: 7px !important;
+  }
+
+  .page-header {
+    gap: 7px !important;
+    margin-bottom: 9px !important;
+  }
+
+  .page-header h1 {
+    font-size: 20px !important;
+    line-height: 1.1 !important;
+  }
+
+  .page-header p {
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+  }
+
+  .btn-add,
+  .btn-back {
+    height: 36px !important;
+    padding: 7px 9px !important;
+    border-radius: 11px !important;
+    font-size: 11px !important;
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+    margin-bottom: 9px !important;
+  }
+
+  .kpi-card {
+    padding: 10px !important;
+    border-radius: 14px !important;
+    border-left-width: 4px !important;
+    box-shadow: 0 5px 14px rgba(15, 23, 42, 0.06) !important;
+  }
+
+  .kpi-card span {
+    font-size: 9.5px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .kpi-card strong {
+    font-size: 13px !important;
+    line-height: 1.15 !important;
+  }
+
+  .toolbar {
+    padding: 10px !important;
+    border-radius: 14px !important;
+    gap: 8px !important;
+    margin-bottom: 10px !important;
+    box-shadow: 0 5px 14px rgba(15, 23, 42, 0.06) !important;
+  }
+
+  .toolbar h3 {
+    font-size: 16px !important;
+    margin-bottom: 3px !important;
+  }
+
+  .toolbar p {
+    font-size: 10.5px !important;
+    line-height: 1.2 !important;
+  }
+
+  .toolbar input {
+    height: 35px !important;
+    padding: 6px 10px !important;
+    border-radius: 11px !important;
+    font-size: 11px !important;
+  }
+
+  .projects-grid {
+    gap: 9px !important;
+  }
+
+  .project-card {
+    padding: 11px !important;
+    border-radius: 16px !important;
+    border-top-width: 4px !important;
+    box-shadow: 0 5px 14px rgba(15, 23, 42, 0.06) !important;
+  }
+
+  .project-top {
+    gap: 7px !important;
+    margin-bottom: 9px !important;
+  }
+
+  .project-code {
+    font-size: 10px !important;
+    padding: 4px 7px !important;
+  }
+
+  .project-top h3 {
+    font-size: 15.5px !important;
+    margin: 7px 0 3px !important;
+    line-height: 1.15 !important;
+  }
+
+  .project-top p {
+    font-size: 10.5px !important;
+  }
+
+  .risk-badge {
+    font-size: 9.5px !important;
+    padding: 5px 7px !important;
+  }
+
+  .project-info,
+  .budget-box {
+    gap: 6px !important;
+    margin-bottom: 7px !important;
+  }
+
+  .project-info div,
+  .budget-box div {
+    padding: 8px !important;
+    border-radius: 11px !important;
+  }
+
+  .project-info span,
+  .budget-box span {
+    font-size: 9.5px !important;
+    margin-bottom: 3px !important;
+  }
+
+  .project-info strong,
+  .budget-box strong {
+    font-size: 11px !important;
+    line-height: 1.15 !important;
+  }
+
+  .progress-section {
+    margin-bottom: 9px !important;
+  }
+
+  .progress-label {
+    font-size: 11px !important;
+    margin-bottom: 5px !important;
+  }
+
+  .progress-track {
+    height: 7px !important;
+  }
+
+  .project-actions {
+    gap: 6px !important;
+  }
+
+  .project-actions button {
+    height: 32px !important;
+    padding: 5px 7px !important;
+    border-radius: 10px !important;
+    font-size: 10.5px !important;
+  }
+
+  .form-card {
+    padding: 10px !important;
+    border-radius: 16px !important;
+  }
+
+  .form-card-header {
+    gap: 6px !important;
+    margin-bottom: 10px !important;
+    padding-bottom: 10px !important;
+  }
+
+  .form-card-header h3 {
+    font-size: 15.5px !important;
+  }
+
+  .form-card-header p {
+    font-size: 10.5px !important;
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+  }
+
+  .form-group label {
+    font-size: 9.5px !important;
+    margin-bottom: 3px !important;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    min-height: 32px !important;
+    padding: 5px 7px !important;
+    border-radius: 9px !important;
+    font-size: 10.5px !important;
+  }
+
+  .form-group textarea {
+    min-height: 70px !important;
+  }
+
+  .form-actions {
+    margin-top: 10px !important;
+    gap: 7px !important;
+  }
+
+  .btn-save,
+  .btn-cancel {
+    height: 34px !important;
+    padding: 6px !important;
+    font-size: 10.5px !important;
+    border-radius: 10px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .projets-layout {
+    grid-template-columns: 58px minmax(0, 1fr) !important;
+  }
+
+  .projets-content {
+    padding: 6px !important;
+  }
+
+  .sidebar-link strong {
+    font-size: 8px !important;
+  }
+
+  .sidebar-icon {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .page-header h1 {
+    font-size: 19px !important;
+  }
+
+  .kpi-card strong {
+    font-size: 12.5px !important;
+  }
+
+  .project-card {
+    padding: 10px !important;
+  }
+
+  .project-top h3 {
+    font-size: 15px !important;
+  }
+
+  .project-actions button {
+    height: 31px !important;
+    font-size: 10px !important;
+  }
+}
+/* ===================================================== */
+/* PROJETS - MOBILE ULTRA COMPACT FINAL */
+/* À METTRE TOUT À LA FIN DE projets.component.css */
+/* ===================================================== */
+
+@media (max-width: 768px) {
+  .projets-layout {
+    grid-template-columns: 52px minmax(0, 1fr) !important;
+    min-height: calc(100vh - 70px) !important;
+  }
+
+  .projets-sidebar {
+    padding: 8px 4px !important;
+    background: #ffffff !important;
+  }
+
+  .sidebar-title {
+    display: none !important;
+  }
+
+  .sidebar-link {
+    width: 44px !important;
+    min-height: 52px !important;
+    padding: 6px 3px !important;
+    margin: 0 auto 8px !important;
+    border-radius: 13px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 3px !important;
+  }
+
+  .sidebar-icon {
+    width: 27px !important;
+    height: 27px !important;
+    font-size: 14px !important;
+    border-radius: 9px !important;
+  }
+
+  .sidebar-link strong {
+    font-size: 7.5px !important;
+    line-height: 0.95 !important;
+    text-align: center !important;
+  }
+
+  .sidebar-link small {
+    display: none !important;
+  }
+
+  .projets-content {
+    padding: 7px !important;
+    overflow-x: hidden !important;
+  }
+
+  .page-header {
+    margin-bottom: 8px !important;
+    gap: 7px !important;
+  }
+
+  .page-header h1 {
+    font-size: 19px !important;
+    line-height: 1.05 !important;
+  }
+
+  .page-header p {
+    font-size: 10.5px !important;
+    line-height: 1.2 !important;
+  }
+
+  .btn-add,
+  .btn-back {
+    height: 34px !important;
+    padding: 6px 8px !important;
+    border-radius: 10px !important;
+    font-size: 10.5px !important;
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .kpi-card {
+    padding: 9px !important;
+    border-radius: 13px !important;
+    border-left-width: 4px !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05) !important;
+  }
+
+  .kpi-card span {
+    font-size: 9px !important;
+    margin-bottom: 3px !important;
+    line-height: 1.1 !important;
+  }
+
+  .kpi-card strong {
+    font-size: 12px !important;
+    line-height: 1.1 !important;
+  }
+
+  .toolbar {
+    padding: 9px !important;
+    border-radius: 14px !important;
+    margin-bottom: 8px !important;
+    gap: 7px !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05) !important;
+  }
+
+  .toolbar h3 {
+    font-size: 15px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .toolbar p {
+    font-size: 10px !important;
+    line-height: 1.15 !important;
+  }
+
+  .toolbar input {
+    height: 33px !important;
+    padding: 5px 9px !important;
+    border-radius: 10px !important;
+    font-size: 10.5px !important;
+  }
+
+  .projects-grid {
+    gap: 8px !important;
+  }
+
+  .project-card {
+    padding: 10px !important;
+    border-radius: 15px !important;
+    border-top-width: 4px !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05) !important;
+  }
+
+  .project-top {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    align-items: start !important;
+    gap: 8px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .project-code {
+    font-size: 9.5px !important;
+    padding: 4px 7px !important;
+  }
+
+  .project-top h3 {
+    font-size: 14px !important;
+    margin: 6px 0 2px !important;
+    line-height: 1.1 !important;
+  }
+
+  .project-top p {
+    font-size: 10px !important;
+    line-height: 1.1 !important;
+  }
+
+  .risk-badge {
+    font-size: 9px !important;
+    padding: 5px 7px !important;
+    white-space: nowrap !important;
+  }
+
+  .project-info {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .budget-box {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    margin-bottom: 7px !important;
+  }
+
+  .project-info div,
+  .budget-box div {
+    padding: 7px !important;
+    border-radius: 10px !important;
+  }
+
+  .project-info span,
+  .budget-box span {
+    font-size: 8.8px !important;
+    margin-bottom: 2px !important;
+    line-height: 1.05 !important;
+  }
+
+  .project-info strong,
+  .budget-box strong {
+    font-size: 10.5px !important;
+    line-height: 1.1 !important;
+  }
+
+  .progress-section {
+    margin-bottom: 8px !important;
+  }
+
+  .progress-label {
+    font-size: 10.5px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .progress-track {
+    height: 6px !important;
+  }
+
+  .project-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  .project-actions button {
+    width: 100% !important;
+    height: 31px !important;
+    padding: 5px 6px !important;
+    border-radius: 9px !important;
+    font-size: 9.8px !important;
+    line-height: 1.05 !important;
+  }
+
+  .form-card {
+    padding: 9px !important;
+    border-radius: 15px !important;
+  }
+
+  .form-card-header {
+    gap: 6px !important;
+    margin-bottom: 9px !important;
+    padding-bottom: 9px !important;
+  }
+
+  .form-card-header h3 {
+    font-size: 15px !important;
+  }
+
+  .form-card-header p {
+    font-size: 10px !important;
+  }
+
+  .form-badge {
+    font-size: 9px !important;
+    padding: 5px 7px !important;
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  .form-group label {
+    font-size: 9px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    min-height: 30px !important;
+    padding: 5px 7px !important;
+    border-radius: 8px !important;
+    font-size: 10px !important;
+  }
+
+  .form-group textarea {
+    min-height: 65px !important;
+  }
+
+  .form-actions {
+    margin-top: 9px !important;
+    gap: 6px !important;
+  }
+
+  .btn-save,
+  .btn-cancel {
+    height: 32px !important;
+    padding: 6px !important;
+    font-size: 10px !important;
+    border-radius: 9px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .projets-layout {
+    grid-template-columns: 48px minmax(0, 1fr) !important;
+  }
+
+  .projets-content {
+    padding: 6px !important;
+  }
+
+  .sidebar-link {
+    width: 40px !important;
+    min-height: 48px !important;
+  }
+
+  .sidebar-icon {
+    width: 25px !important;
+    height: 25px !important;
+  }
+
+  .sidebar-link strong {
+    font-size: 7px !important;
+  }
+
+  .page-header h1 {
+    font-size: 18px !important;
+  }
+
+  .kpi-card strong {
+    font-size: 11.5px !important;
+  }
+
+  .project-card {
+    padding: 9px !important;
+  }
+
+  .project-top h3 {
+    font-size: 13.5px !important;
+  }
+
+  .project-info,
+  .budget-box {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .project-actions button {
+    height: 30px !important;
+    font-size: 9.5px !important;
   }
 }

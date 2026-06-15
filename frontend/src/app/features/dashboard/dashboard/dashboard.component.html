@@ -6,19 +6,21 @@
     </div>
 
     <button
-  class="sidebar-item"
-  type="button"
-  *ngFor="let page of visiblePages"
-  [class.active]="activePage === page.key"
-  (click)="setActivePage(page.key)"
->
-  <span class="sidebar-icon">{{ page.icon }}</span>
+      class="sidebar-item"
+      type="button"
+      *ngFor="let page of visiblePages"
+      [class.active]="activePage === page.key"
+      [attr.aria-label]="page.title"
+      [title]="page.title"
+      (click)="setActivePage(page.key)"
+    >
+      <span class="sidebar-icon">{{ page.icon }}</span>
 
-  <span>
-    <strong>{{ page.title }}</strong>
-    <small>{{ page.description }}</small>
-  </span>
-</button>
+      <span class="sidebar-text">
+        <strong>{{ page.title }}</strong>
+        <small>{{ page.description }}</small>
+      </span>
+    </button>
 
     <div class="sidebar-summary">
       <span>Projet actif</span>
@@ -41,18 +43,34 @@
         <div class="project-filter">
           <label>Projet</label>
 
-          <select [(ngModel)]="codeProjet" (change)="onProjetChange()">
+          <select
+            [(ngModel)]="codeProjet"
+            (change)="onProjetChange()"
+            aria-label="Sélectionner un projet"
+          >
             <option *ngFor="let p of projets" [value]="p.value">
               {{ p.label }}
             </option>
           </select>
         </div>
 
-        <button class="refresh-btn" type="button" (click)="loadDashboard()">
+        <button
+          class="refresh-btn"
+          type="button"
+          title="Actualiser les données du dashboard"
+          aria-label="Actualiser les données du dashboard"
+          (click)="loadDashboard()"
+        >
           Actualiser
         </button>
 
-        <button class="pdf-btn" type="button" (click)="exportPDF()">
+        <button
+          class="pdf-btn"
+          type="button"
+          title="Exporter le dashboard en PDF"
+          aria-label="Exporter le dashboard en PDF"
+          (click)="exportPDF()"
+        >
           Export PDF
         </button>
       </div>
@@ -84,6 +102,7 @@
           <div class="mini-card">
             <span>Taux anomalies</span>
             <strong>{{ getAnomalyRate() }} %</strong>
+
             <div class="mini-progress">
               <div [style.width.%]="getAnomalyRate()"></div>
             </div>
@@ -91,9 +110,11 @@
 
           <div class="mini-card">
             <span>Évolution vs historique</span>
+
             <strong [class]="getEvolutionGlobale() >= 0 ? 'success-text' : 'danger-text'">
               {{ getEvolutionGlobale() | number:'1.0-2' }} %
             </strong>
+
             <p>Comparaison globale du montant actuel.</p>
           </div>
         </div>
@@ -106,6 +127,7 @@
 
           <div class="kpi-card">
             <span>Marge moyenne</span>
+
             <strong [class]="getMargeClass(kpis.margeNetteMoyenne || 0)">
               {{ kpis.margeNetteMoyenne || 0 | number:'1.0-2' }} %
             </strong>
@@ -128,7 +150,12 @@
             <p>Vision multicritère du projet.</p>
 
             <div class="chart-box">
-              <canvas baseChart [data]="radarChartData" [options]="chartOptions" type="radar"></canvas>
+              <canvas
+                baseChart
+                [data]="radarChartData"
+                [options]="radarOptions"
+                type="radar"
+              ></canvas>
             </div>
           </div>
 
@@ -137,7 +164,12 @@
             <p>Distribution du montant par section.</p>
 
             <div class="chart-box">
-              <canvas baseChart [data]="pieChartData" [options]="chartOptions" type="doughnut"></canvas>
+              <canvas
+                baseChart
+                [data]="pieChartData"
+                [options]="doughnutOptions"
+                type="doughnut"
+              ></canvas>
             </div>
           </div>
         </div>
@@ -163,6 +195,7 @@
 
           <div class="kpi-card">
             <span>Évolution</span>
+
             <strong [class]="getEvolutionGlobale() >= 0 ? 'success-text' : 'danger-text'">
               {{ getEvolutionGlobale() | number:'1.0-2' }} %
             </strong>
@@ -170,6 +203,7 @@
 
           <div class="kpi-card">
             <span>Marge nette moyenne</span>
+
             <strong [class]="getMargeClass(kpis.margeNetteMoyenne || 0)">
               {{ kpis.margeNetteMoyenne || 0 | number:'1.0-2' }} %
             </strong>
@@ -182,7 +216,12 @@
             <p>Montant actuel comparé à l’historique simulé.</p>
 
             <div class="chart-box">
-              <canvas baseChart [data]="amountChartData" [options]="chartOptions" type="bar"></canvas>
+              <canvas
+                baseChart
+                [data]="amountChartData"
+                [options]="chartOptions"
+                type="bar"
+              ></canvas>
             </div>
           </div>
 
@@ -191,7 +230,12 @@
             <p>Courbe de rentabilité des sections.</p>
 
             <div class="chart-box">
-              <canvas baseChart [data]="marginChartData" [options]="chartOptions" type="line"></canvas>
+              <canvas
+                baseChart
+                [data]="marginChartData"
+                [options]="chartOptions"
+                type="line"
+              ></canvas>
             </div>
           </div>
         </div>
@@ -208,7 +252,10 @@
               </div>
 
               <div class="bar-track">
-                <div class="bar-fill amount" [style.width.%]="getBarWidth(s.montantFcfa, maxMontant)"></div>
+                <div
+                  class="bar-fill amount"
+                  [style.width.%]="getBarWidth(s.montantFcfa, maxMontant)"
+                ></div>
               </div>
             </div>
           </div>
@@ -244,22 +291,69 @@
           </div>
         </div>
 
+        <div class="chart-filter-row">
+          <div>
+            <h3>Filtres des visuels catégories</h3>
+            <p>Limitez le nombre de catégories affichées pour améliorer la lisibilité.</p>
+          </div>
+
+          <div class="chart-filter-control">
+            <label>Affichage</label>
+
+            <select
+              [(ngModel)]="categoryChartLimit"
+              (change)="onCategoryLimitChange()"
+              aria-label="Filtrer les visuels catégories"
+            >
+              <option *ngFor="let option of categoryLimitOptions" [ngValue]="option.value">
+                {{ option.label }}
+              </option>
+            </select>
+          </div>
+        </div>
+
         <div class="charts-grid">
           <div class="chart-card">
-            <h3>Montant par catégorie</h3>
-            <p>Analyse détaillée des catégories.</p>
+            <div class="chart-card-header">
+              <div>
+                <h3>Montant par catégorie</h3>
+                <p>Analyse détaillée des catégories les plus importantes.</p>
+              </div>
+
+              <span class="chart-badge">
+                {{ categoryChartLimit === 999 ? 'Toutes' : 'Top ' + categoryChartLimit }}
+              </span>
+            </div>
 
             <div class="chart-box">
-              <canvas baseChart [data]="categoryAmountChartData" [options]="chartOptions" type="bar"></canvas>
+              <canvas
+                baseChart
+                [data]="categoryAmountChartData"
+                [options]="chartOptions"
+                type="bar"
+              ></canvas>
             </div>
           </div>
 
           <div class="chart-card">
-            <h3>Marge moyenne par catégorie</h3>
-            <p>Rentabilité détaillée des postes.</p>
+            <div class="chart-card-header">
+              <div>
+                <h3>Marge moyenne par catégorie</h3>
+                <p>Rentabilité détaillée des postes filtrés.</p>
+              </div>
+
+              <span class="chart-badge">
+                {{ categoryChartLimit === 999 ? 'Toutes' : 'Top ' + categoryChartLimit }}
+              </span>
+            </div>
 
             <div class="chart-box">
-              <canvas baseChart [data]="categoryMarginChartData" [options]="chartOptions" type="line"></canvas>
+              <canvas
+                baseChart
+                [data]="categoryMarginChartData"
+                [options]="chartOptions"
+                type="line"
+              ></canvas>
             </div>
           </div>
         </div>
@@ -270,14 +364,21 @@
             <p>Cliquez sur une section pour afficher ses catégories.</p>
 
             <div class="bar-list">
-              <div class="bar-row clickable" *ngFor="let s of sections" (click)="selectSection(s)">
+              <div
+                class="bar-row clickable"
+                *ngFor="let s of sections"
+                (click)="selectSection(s)"
+              >
                 <div class="bar-label">
                   <strong>Section {{ s.section }}</strong>
                   <span>{{ s.margeMoyenne | number:'1.0-2' }} %</span>
                 </div>
 
                 <div class="bar-track">
-                  <div class="bar-fill margin" [style.width.%]="getBarWidth(s.margeMoyenne, maxMarge)"></div>
+                  <div
+                    class="bar-fill margin"
+                    [style.width.%]="getBarWidth(s.margeMoyenne, maxMarge)"
+                  ></div>
                 </div>
               </div>
             </div>
@@ -309,7 +410,15 @@
               <p>Analyse par catégorie.</p>
             </div>
 
-            <button type="button" class="clear-btn" (click)="clearDrillDown()">Fermer</button>
+            <button
+              type="button"
+              class="clear-btn"
+              title="Fermer le détail de la section"
+              aria-label="Fermer le détail de la section"
+              (click)="clearDrillDown()"
+            >
+              Fermer
+            </button>
           </div>
 
           <div class="drill-kpis">
@@ -343,9 +452,11 @@
               <tr *ngFor="let c of selectedCategories">
                 <td>{{ c.categorie }}</td>
                 <td>{{ c.montantFcfa | number:'1.0-0' }}</td>
+
                 <td [class]="getMargeClass(c.margeMoyenne)">
                   {{ c.margeMoyenne | number:'1.0-2' }} %
                 </td>
+
                 <td>{{ c.anomalies }}</td>
               </tr>
             </tbody>
@@ -388,7 +499,12 @@
             <p>Sections nécessitant une vérification.</p>
 
             <div class="chart-box">
-              <canvas baseChart [data]="anomalyChartData" [options]="chartOptions" type="bar"></canvas>
+              <canvas
+                baseChart
+                [data]="anomalyChartData"
+                [options]="chartOptions"
+                type="bar"
+              ></canvas>
             </div>
           </div>
 
@@ -429,12 +545,17 @@
           </div>
 
           <div class="alerts-list" *ngIf="alertes.length > 0">
-            <div class="alert-item" *ngFor="let a of alertes" [class.critical]="a.niveau === 'Critique'">
+            <div
+              class="alert-item"
+              *ngFor="let a of alertes"
+              [class.critical]="a.niveau === 'Critique'"
+            >
               <div class="alert-icon">⚠️</div>
 
               <div class="alert-content">
                 <strong>{{ a.message }}</strong>
                 <p>Section {{ a.section }} — {{ a.designation }}</p>
+
                 <small>
                   Niveau : {{ a.niveau }} |
                   Catégorie : {{ a.categorie }} |
@@ -447,7 +568,7 @@
         </div>
       </section>
 
-      <!-- ================= PAGE 5 : COÛTS & MARGES UNIQUEMENT DI-M3 ================= -->
+      <!-- ================= PAGE 5 : COÛTS & MARGES ================= -->
       <section *ngIf="activePage === 'couts' && codeProjet === 'DI-M3'">
         <div class="section-header">
           <h2>Analyse des coûts et marges — {{ codeProjet }}</h2>
@@ -481,7 +602,9 @@
         <div class="executive-grid">
           <div class="score-card">
             <div class="score-circle">
-              <span>{{ (couts.kpis?.margeNettePctMoyenne || 0) * 100 | number:'1.0-0' }}%</span>
+              <span>
+                {{ (couts.kpis?.margeNettePctMoyenne || 0) * 100 | number:'1.0-0' }}%
+              </span>
             </div>
 
             <div>
@@ -498,10 +621,33 @@
 
           <div class="mini-card">
             <span>Marge nette moyenne</span>
+
             <strong [class]="getCostHealthClass()">
               {{ (couts.kpis?.margeNettePctMoyenne || 0) * 100 | number:'1.0-2' }} %
             </strong>
+
             <p>Indicateur final de rentabilité.</p>
+          </div>
+        </div>
+
+        <div class="chart-filter-row">
+          <div>
+            <h3>Filtres des visuels coûts</h3>
+            <p>Affichez uniquement les lignes de coûts les plus importantes.</p>
+          </div>
+
+          <div class="chart-filter-control">
+            <label>Affichage</label>
+
+            <select
+              [(ngModel)]="costChartLimit"
+              (change)="onCostLimitChange()"
+              aria-label="Filtrer les visuels coûts"
+            >
+              <option *ngFor="let option of costLimitOptions" [ngValue]="option.value">
+                {{ option.label }}
+              </option>
+            </select>
           </div>
         </div>
 
@@ -511,26 +657,53 @@
             <p>Prix de revient, frais généraux et marge sous-traitant.</p>
 
             <div class="chart-box">
-              <canvas baseChart [data]="costBreakdownChartData" [options]="chartOptions" type="doughnut"></canvas>
+              <canvas
+                baseChart
+                [data]="costBreakdownChartData"
+                [options]="doughnutOptions"
+                type="doughnut"
+              ></canvas>
             </div>
           </div>
 
           <div class="chart-card">
-            <h3>Marge brute vs marge nette</h3>
-            <p>Comparaison des marges par ligne de coût.</p>
+            <div class="chart-card-header">
+              <div>
+                <h3>Marge brute vs marge nette</h3>
+                <p>Comparaison des marges sur les principaux coûts.</p>
+              </div>
+
+              <span class="chart-badge">Top {{ costChartLimit }}</span>
+            </div>
 
             <div class="chart-box">
-              <canvas baseChart [data]="marginCostChartData" [options]="chartOptions" type="bar"></canvas>
+              <canvas
+                baseChart
+                [data]="marginCostChartData"
+                [options]="chartOptions"
+                type="bar"
+              ></canvas>
             </div>
           </div>
         </div>
 
         <div class="chart-card">
-          <h3>Évolution coût final / prix de revient</h3>
-          <p>Lecture comparative des coûts par identifiant.</p>
+          <div class="chart-card-header">
+            <div>
+              <h3>Évolution coût final / prix de revient</h3>
+              <p>Lecture comparative des coûts filtrés.</p>
+            </div>
 
-          <div class="chart-box">
-            <canvas baseChart [data]="costEvolutionChartData" [options]="chartOptions" type="line"></canvas>
+            <span class="chart-badge">Top {{ costChartLimit }}</span>
+          </div>
+
+          <div class="chart-box wide-chart">
+            <canvas
+              baseChart
+              [data]="costEvolutionChartData"
+              [options]="chartOptions"
+              type="line"
+            ></canvas>
           </div>
         </div>
 
@@ -544,6 +717,7 @@
 
               <div>
                 <strong>Coût {{ c.idCout }}</strong>
+
                 <small>
                   Marge nette :
                   {{ (c.margeNettePct || 0) * 100 | number:'1.0-2' }} %

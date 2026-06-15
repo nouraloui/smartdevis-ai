@@ -1,19 +1,31 @@
 <div class="ia-page">
   <div class="page-header">
-    <h2>Analyse IA</h2>
-    <p>Détection d’anomalies, score de risque et suggestion intelligente des valeurs</p>
+    <div>
+      <h2>Analyse IA</h2>
+      <p>Détection d’anomalies, score de risque et suggestion intelligente des valeurs</p>
+    </div>
   </div>
 
   <div class="ia-card">
-    <h3>Données du devis</h3>
-    <p class="card-description">
-      Saisissez les informations principales pour analyser le devis avec les modules IA.
-    </p>
+    <div class="card-header">
+      <div>
+        <h3>Données du devis</h3>
+        <p class="card-description">
+          Saisissez les informations principales pour analyser le devis avec les modules IA.
+        </p>
+      </div>
+
+      <span class="ia-badge">SmartDevis</span>
+    </div>
 
     <div class="form-grid">
       <div class="form-group">
-        <label>Projet / Dataset</label>
-        <select [(ngModel)]="codeProjet">
+        <label for="codeProjet">Projet</label>
+        <select
+          id="codeProjet"
+          [(ngModel)]="codeProjet"
+          aria-label="Sélectionner un projet"
+        >
           <option *ngFor="let p of projets" [value]="p.value">
             {{ p.label }}
           </option>
@@ -21,59 +33,118 @@
       </div>
 
       <div class="form-group">
-        <label>PU FCFA</label>
-        <input type="number" [(ngModel)]="puFcfa" placeholder="Exemple : 13284000" />
+        <label for="puFcfa">PU FCFA</label>
+        <input
+          id="puFcfa"
+          type="number"
+          [(ngModel)]="puFcfa"
+          placeholder="Exemple : 13284000"
+        />
       </div>
 
       <div class="form-group">
-        <label>Quantité</label>
-        <input type="number" [(ngModel)]="quantite" placeholder="Exemple : 1" />
+        <label for="quantite">Quantité</label>
+        <input
+          id="quantite"
+          type="number"
+          [(ngModel)]="quantite"
+          placeholder="Exemple : 1"
+        />
       </div>
 
       <div class="form-group">
-        <label>Prix de revient FCFA</label>
-        <input type="number" [(ngModel)]="prixRevientFcfa" placeholder="Exemple : 12000000" />
+        <label for="prixRevientFcfa">Prix de revient FCFA</label>
+        <input
+          id="prixRevientFcfa"
+          type="number"
+          [(ngModel)]="prixRevientFcfa"
+          placeholder="Exemple : 12000000"
+        />
       </div>
 
       <div class="form-group">
-        <label>Frais de gestion (%)</label>
-        <input type="number" [(ngModel)]="fraisGestionPct" placeholder="Exemple : 5" />
+        <label for="fraisGestionPct">Frais de gestion (%)</label>
+        <input
+          id="fraisGestionPct"
+          type="number"
+          [(ngModel)]="fraisGestionPct"
+          placeholder="Exemple : 5"
+        />
       </div>
 
       <div class="form-group">
-        <label>Marge nette (%)</label>
-        <input type="number" [(ngModel)]="margeNettePct" placeholder="Exemple : 12" />
+        <label for="margeNettePct">Marge nette (%)</label>
+        <input
+          id="margeNettePct"
+          type="number"
+          [(ngModel)]="margeNettePct"
+          placeholder="Exemple : 12"
+        />
       </div>
 
       <div class="form-group">
-        <label>Code catégorie</label>
-        <input type="number" [(ngModel)]="categorieCode" placeholder="Exemple : 1" />
+        <label for="categorieCode">Code catégorie</label>
+        <input
+          id="categorieCode"
+          type="number"
+          [(ngModel)]="categorieCode"
+          placeholder="Exemple : 1"
+        />
       </div>
     </div>
 
     <div class="montant-preview" *ngIf="puFcfa && quantite">
-      Montant calculé :
+      <span>Montant calculé</span>
       <strong>{{ montantFcfa | number:'1.0-0' }} FCFA</strong>
     </div>
 
     <div class="actions">
-      <button class="btn-primary" type="button" (click)="detectAnomaly()" [disabled]="loadingAnomaly">
+      <button
+        class="btn-primary"
+        type="button"
+        (click)="detectAnomaly()"
+        [disabled]="loadingAnomaly"
+        aria-label="Détecter une anomalie"
+      >
         {{ loadingAnomaly ? 'Analyse...' : 'Détecter anomalie' }}
       </button>
 
-      <button class="btn-risk" type="button" (click)="calculateRiskScore()" [disabled]="loadingRisk">
+      <button
+        class="btn-risk"
+        type="button"
+        (click)="calculateRiskScore()"
+        [disabled]="loadingRisk"
+        aria-label="Calculer le score de risque"
+      >
         {{ loadingRisk ? 'Calcul...' : 'Calculer score de risque' }}
       </button>
 
-      <button class="btn-suggestion" type="button" (click)="suggestValues()" [disabled]="loadingSuggestion">
+      <button
+        class="btn-suggestion"
+        type="button"
+        (click)="suggestValues()"
+        [disabled]="loadingSuggestion"
+        aria-label="Suggérer des valeurs IA"
+      >
         {{ loadingSuggestion ? 'Suggestion...' : 'Suggérer valeurs IA' }}
       </button>
 
-      <button class="btn-margin" type="button" (click)="predictMargin()" [disabled]="loadingMargin">
+      <button
+        class="btn-margin"
+        type="button"
+        (click)="predictMargin()"
+        [disabled]="loadingMargin"
+        aria-label="Prédire la marge"
+      >
         {{ loadingMargin ? 'Prédiction...' : 'Prédire marge' }}
       </button>
 
-      <button class="btn-reset" type="button" (click)="reset()">
+      <button
+        class="btn-reset"
+        type="button"
+        (click)="reset()"
+        aria-label="Réinitialiser le formulaire"
+      >
         Réinitialiser
       </button>
     </div>
@@ -91,7 +162,7 @@
       {{ anomalyResult.anomalie ? '⚠️' : '✅' }}
     </div>
 
-    <div>
+    <div class="result-content">
       <h3>{{ anomalyResult.anomalie ? 'Anomalie détectée' : 'Prix normal' }}</h3>
       <p>{{ anomalyResult.message }}</p>
       <small>Score IA : {{ anomalyResult.score | number:'1.4-4' }}</small>
@@ -124,7 +195,9 @@
     <div class="risk-section">
       <h4>Causes détectées</h4>
       <ul>
-        <li *ngFor="let cause of riskResult.causes">{{ cause }}</li>
+        <li *ngFor="let cause of riskResult.causes">
+          {{ cause }}
+        </li>
       </ul>
     </div>
 

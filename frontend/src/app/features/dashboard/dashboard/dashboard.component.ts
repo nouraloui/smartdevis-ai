@@ -51,6 +51,24 @@ export class DashboardComponent implements OnInit {
   maxMarge = 1;
   maxCategorieMontant = 1;
 
+  categoryChartLimit = 5;
+  costChartLimit = 5;
+
+  categoryLimitOptions = [
+    { label: 'Top 5', value: 5 },
+    { label: 'Top 8', value: 8 },
+    { label: 'Top 10', value: 10 },
+    { label: 'Toutes', value: 999 }
+  ];
+
+  costLimitOptions = [
+    { label: 'Top 5', value: 5 },
+    { label: 'Top 8', value: 8 },
+    { label: 'Top 10', value: 10 },
+    { label: 'Top 15', value: 15 },
+    { label: 'Top 25', value: 25 }
+  ];
+
   pages = [
     { key: 'global' as DashboardPage, title: 'Vue globale', icon: '📊', description: 'Synthèse générale' },
     { key: 'finance' as DashboardPage, title: 'Performance financière', icon: '💰', description: 'Montants et marges' },
@@ -64,7 +82,64 @@ export class DashboardComponent implements OnInit {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'bottom'
+        position: 'bottom',
+        labels: {
+          boxWidth: 14,
+          font: {
+            size: 11
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        ticks: {
+          autoSkip: false,
+          maxRotation: 35,
+          minRotation: 0,
+          font: {
+            size: 10
+          }
+        }
+      },
+      y: {
+        ticks: {
+          font: {
+            size: 10
+          }
+        }
+      }
+    }
+  };
+
+  doughnutOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          boxWidth: 14,
+          font: {
+            size: 11
+          }
+        }
+      }
+    }
+  };
+
+  radarOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          boxWidth: 14,
+          font: {
+            size: 11
+          }
+        }
       }
     }
   };
@@ -101,6 +176,14 @@ export class DashboardComponent implements OnInit {
 
     this.activePage = page;
     this.clearDrillDown();
+  }
+
+  onCategoryLimitChange(): void {
+    this.buildCharts();
+  }
+
+  onCostLimitChange(): void {
+    this.buildCharts();
   }
 
   loadDashboard(): void {
@@ -150,6 +233,28 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  private shortenLabel(value: any, maxLength = 24): string {
+    const text = String(value || 'Non définie');
+
+    if (text.length <= maxLength) {
+      return text;
+    }
+
+    return text.slice(0, maxLength) + '...';
+  }
+
+  private getFilteredCategories(): any[] {
+    const sorted = [...this.categories].sort(
+      (a, b) => Number(b.montantFcfa || 0) - Number(a.montantFcfa || 0)
+    );
+
+    if (this.categoryChartLimit === 999) {
+      return sorted;
+    }
+
+    return sorted.slice(0, this.categoryChartLimit);
+  }
+
   private getFilteredCostLines(): any[] {
     return (this.couts?.lignes || [])
       .filter((c: any) => {
@@ -168,16 +273,19 @@ export class DashboardComponent implements OnInit {
       .sort((a: any, b: any) => {
         const aValue = Number(a.prixRevientTotalEur) || Number(a.coutFinalDt) || 0;
         const bValue = Number(b.prixRevientTotalEur) || Number(b.coutFinalDt) || 0;
+
         return bValue - aValue;
       })
-      .slice(0, 25);
+      .slice(0, this.costChartLimit);
   }
 
   buildCharts(): void {
     const labels = this.sections.map((s) => `Section ${s.section}`);
 
-    const categoryLabels = this.categories.map(
-      (c) => c.categorie || 'Non définie'
+    const filteredCategories = this.getFilteredCategories();
+
+    const categoryLabels = filteredCategories.map((c) =>
+      this.shortenLabel(c.categorie, 22)
     );
 
     const red = '#c7352e';
@@ -250,7 +358,7 @@ export class DashboardComponent implements OnInit {
       datasets: [
         {
           label: 'Montant par catégorie FCFA',
-          data: this.categories.map((c) => Number(c.montantFcfa) || 0),
+          data: filteredCategories.map((c) => Number(c.montantFcfa) || 0),
           backgroundColor: red,
           borderColor: darkRed
         }
@@ -262,11 +370,13 @@ export class DashboardComponent implements OnInit {
       datasets: [
         {
           label: 'Marge moyenne catégorie (%)',
-          data: this.categories.map((c) => Number(c.margeMoyenne) || 0),
-          tension: 0.4,
+          data: filteredCategories.map((c) => Number(c.margeMoyenne) || 0),
+          tension: 0.35,
           fill: true,
           borderColor: dark,
-          backgroundColor: 'rgba(15, 23, 42, 0.10)'
+          backgroundColor: 'rgba(15, 23, 42, 0.10)',
+          pointBackgroundColor: red,
+          pointBorderColor: red
         }
       ]
     };
@@ -293,7 +403,10 @@ export class DashboardComponent implements OnInit {
     const filteredCosts = this.getFilteredCostLines();
 
     const coutLabels = filteredCosts.map((c: any) => {
-      if (c.designation) return String(c.designation).slice(0, 30);
+      if (c.designation) {
+        return this.shortenLabel(c.designation, 22);
+      }
+
       return `Coût ${c.idCout}`;
     });
 
@@ -305,7 +418,8 @@ export class DashboardComponent implements OnInit {
             Number(this.couts?.kpis?.prixRevientTotalEur) || 0,
             Number(this.couts?.kpis?.coutFgTotalDt) || 0,
             filteredCosts.reduce(
-              (sum: number, c: any) => sum + Math.abs(Number(c.margeSousTraitantDt) || 0),
+              (sum: number, c: any) =>
+                sum + Math.abs(Number(c.margeSousTraitantDt) || 0),
               0
             )
           ],
@@ -336,18 +450,20 @@ export class DashboardComponent implements OnInit {
         {
           label: 'Coût final DT',
           data: filteredCosts.map((c: any) => Number(c.coutFinalDt) || 0),
-          tension: 0.4,
+          tension: 0.35,
           fill: true,
           borderColor: red,
-          backgroundColor: 'rgba(199, 53, 46, 0.12)'
+          backgroundColor: 'rgba(199, 53, 46, 0.12)',
+          pointBackgroundColor: red
         },
         {
           label: 'Prix revient total EUR',
           data: filteredCosts.map((c: any) => Number(c.prixRevientTotalEur) || 0),
-          tension: 0.4,
+          tension: 0.35,
           fill: true,
           borderColor: dark,
-          backgroundColor: 'rgba(15, 23, 42, 0.10)'
+          backgroundColor: 'rgba(15, 23, 42, 0.10)',
+          pointBackgroundColor: dark
         }
       ]
     };

@@ -1,6 +1,9 @@
 <div class="projets-layout">
   <aside class="projets-sidebar">
-    <h3>Projets</h3>
+    <div class="sidebar-title">
+      <h3>Projets</h3>
+      <p>Gestion des projets et devis</p>
+    </div>
 
     <button
       type="button"
@@ -8,7 +11,11 @@
       [class.active]="activePage === 'list'"
       (click)="changePage('list')"
     >
-      📁 Mes projets
+      <span class="sidebar-icon">📁</span>
+      <span>
+        <strong>Mes projets</strong>
+        <small>Liste et suivi</small>
+      </span>
     </button>
 
     <button
@@ -17,7 +24,11 @@
       [class.active]="activePage === 'create'"
       (click)="changePage('create')"
     >
-      ➕ Créer un projet
+      <span class="sidebar-icon">➕</span>
+      <span>
+        <strong>Créer un projet</strong>
+        <small>Nouveau projet</small>
+      </span>
     </button>
   </aside>
 
@@ -32,7 +43,7 @@
       <div class="page-header">
         <div>
           <h1>Mes projets</h1>
-          <p>Liste des projets existants et suivi opérationnel</p>
+          <p>Liste des projets existants et suivi opérationnel.</p>
         </div>
 
         <button class="btn-add" type="button" (click)="changePage('create')">
@@ -63,20 +74,27 @@
       </div>
 
       <div class="toolbar">
+        <div>
+          <h3>Recherche projet</h3>
+          <p>Filtrer par code, département, directeur, chef projet ou statut.</p>
+        </div>
+
         <input
           type="text"
-          placeholder="Rechercher par code, département, directeur, chef projet..."
+          placeholder="Rechercher un projet..."
           [(ngModel)]="search"
           (input)="applySearch()"
         />
       </div>
 
-      <p *ngIf="loading">Chargement...</p>
+      <div class="loading" *ngIf="loading">
+        Chargement des projets...
+      </div>
 
       <div class="projects-grid" *ngIf="!loading && filteredProjets.length > 0">
         <div class="project-card" *ngFor="let p of filteredProjets">
           <div class="project-top">
-            <div>
+            <div class="project-main-info">
               <span class="project-code">{{ p.code_projet }}</span>
               <h3>{{ getProjectName(p) }}</h3>
               <p>{{ p.departement || 'Département non défini' }}</p>
@@ -169,7 +187,7 @@
       <div class="page-header">
         <div>
           <h1>{{ editMode ? 'Modifier le projet' : 'Créer un projet' }}</h1>
-          <p>Création et mise à jour des informations projet</p>
+          <p>Création et mise à jour des informations projet.</p>
         </div>
 
         <button class="btn-back" type="button" (click)="changePage('list')">
@@ -178,6 +196,17 @@
       </div>
 
       <div class="form-card">
+        <div class="form-card-header">
+          <div>
+            <h3>Informations du projet</h3>
+            <p>Complétez les données principales du projet.</p>
+          </div>
+
+          <span class="form-badge">
+            {{ editMode ? 'Modification' : 'Nouveau' }}
+          </span>
+        </div>
+
         <div class="form-grid">
           <div class="form-group">
             <label>Code projet *</label>
@@ -298,7 +327,11 @@
 
           <div class="form-group full">
             <label>Description</label>
-            <textarea rows="4" [(ngModel)]="form.description"></textarea>
+            <textarea
+              rows="4"
+              [(ngModel)]="form.description"
+              placeholder="Description courte du projet..."
+            ></textarea>
           </div>
         </div>
 
