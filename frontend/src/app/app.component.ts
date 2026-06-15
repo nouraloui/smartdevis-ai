@@ -8,17 +8,15 @@ import { AuthService, ConnectedUser } from './core/services/auth.service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterOutlet,
-    RouterModule,
-  ],
+  imports: [CommonModule, RouterOutlet, RouterModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
 export class AppComponent {
   private router = inject(Router);
   private authService = inject(AuthService);
+
+  mobileMenuOpen = false;
 
   menuItems = [
     { label: 'Dashboard', route: '/dashboard', icon: 'pi pi-home' },
@@ -30,18 +28,11 @@ export class AppComponent {
   ];
 
   get showNavbar(): boolean {
-    const hiddenRoutes = [
-      '/',
-      '/login',
-      '/register'
-    ];
-
+    const hiddenRoutes = ['/', '/login', '/register'];
     const currentUrl = this.router.url.split('?')[0];
 
-    return (
-      !hiddenRoutes.includes(currentUrl) &&
-      !currentUrl.startsWith('/reset-password')
-    );
+    return !hiddenRoutes.includes(currentUrl) &&
+      !currentUrl.startsWith('/reset-password');
   }
 
   get currentUser(): ConnectedUser | null {
@@ -54,6 +45,14 @@ export class AppComponent {
 
   get userRole(): string {
     return this.authService.getCurrentUserRole();
+  }
+
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+  }
+
+  closeMobileMenu(): void {
+    this.mobileMenuOpen = false;
   }
 
   logout(): void {

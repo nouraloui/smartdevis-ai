@@ -1,7 +1,7 @@
 <div class="app-shell">
   <header class="navbar" *ngIf="showNavbar">
-    <div class="navbar-left">
-      <a routerLink="/dashboard" class="brand">
+    <div class="mobile-top">
+      <a routerLink="/dashboard" class="brand" (click)="closeMobileMenu()">
         <img
           src="assets/logo_africa_engineering.jpg"
           alt="Africa Engineering"
@@ -9,38 +9,44 @@
         />
       </a>
 
+      <button class="mobile-menu-btn" type="button" (click)="toggleMobileMenu()">
+        <i class="pi" [ngClass]="mobileMenuOpen ? 'pi-times' : 'pi-bars'"></i>
+      </button>
+    </div>
+
+    <div class="navbar-content" [class.open]="mobileMenuOpen">
       <nav class="nav-links">
         <a
           *ngFor="let item of menuItems"
           [routerLink]="item.route"
           routerLinkActive="active-link"
           class="nav-link"
+          (click)="closeMobileMenu()"
         >
           <i [class]="item.icon"></i>
           <span>{{ item.label }}</span>
         </a>
       </nav>
-    </div>
 
-    <div class="navbar-right">
-      <div class="user-box">
-        <i class="pi pi-user"></i>
+      <div class="navbar-right">
+        <div class="user-box">
+          <i class="pi pi-user"></i>
 
-        <div class="user-info">
-          <span class="user-name">{{ userName }}</span>
-          <small class="user-role">{{ userRole }}</small>
+          <div class="user-info">
+            <span class="user-name">{{ userName }}</span>
+            <small class="user-role">{{ userRole }}</small>
+          </div>
         </div>
-      </div>
 
-      <button class="logout-btn" type="button" (click)="logout()">
-        <i class="pi pi-sign-out"></i>
-        Déconnexion
-      </button>
+        <button class="logout-btn" type="button" (click)="logout()">
+          <i class="pi pi-sign-out"></i>
+          Déconnexion
+        </button>
+      </div>
     </div>
   </header>
 
   <main class="page-container" [class.with-navbar]="showNavbar">
     <router-outlet></router-outlet>
   </main>
-
 </div>
