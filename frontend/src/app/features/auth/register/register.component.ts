@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -13,11 +13,11 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class RegisterComponent {
   private fb = inject(FormBuilder);
-  private router = inject(Router);
   private authService = inject(AuthService);
 
   loading = false;
   errorMessage = '';
+  successMessage = '';
 
   registerForm = this.fb.group({
     nom: ['', [Validators.required]],
@@ -43,6 +43,7 @@ export class RegisterComponent {
 
     this.loading = true;
     this.errorMessage = '';
+    this.successMessage = '';
 
     this.authService.register({
       nom: nom || '',
@@ -50,9 +51,19 @@ export class RegisterComponent {
       password: password || '',
       role: role || 'consultant'
     }).subscribe({
-      next: () => {
+      next: (res: any) => {
         this.loading = false;
-        this.router.navigate(['/dashboard']);
+        this.successMessage =
+          res?.message ||
+          'Votre demande de création de compte a été envoyée. Veuillez attendre la validation de l’administrateur.';
+
+        this.registerForm.reset({
+          nom: '',
+          email: '',
+          password: '',
+          confirmPassword: '',
+          role: 'consultant'
+        });
       },
       error: (err) => {
         this.loading = false;

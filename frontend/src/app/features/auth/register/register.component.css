@@ -116,3 +116,11 @@
   color: #dc2626;
   font-size: 12px;
 }
+
+.success {
+  margin-top: 14px;
+  color: #16a34a;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}

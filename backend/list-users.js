@@ -1,5 +1,9 @@
 const mongoose = require('mongoose');
-require('dotenv').config();
+const path = require('path');
+
+require('dotenv').config({
+  path: path.resolve(__dirname, '.env.development')
+});
 
 const User = require('./src/models/User.model');
 
@@ -9,16 +13,25 @@ const listUsers = async () => {
 
     await mongoose.connect(process.env.MONGO_URI);
 
-    const users = await User.find().select('nom email role actif createdAt');
+    const users = await User.find().select(
+      'nom email role actif approvalStatus approvalToken rejectionToken createdAt'
+    );
 
     console.log('Nombre utilisateurs:', users.length);
-    console.table(users.map(u => ({
-      id: u._id.toString(),
-      nom: u.nom,
-      email: u.email,
-      role: u.role,
-      actif: u.actif
-    })));
+
+    console.table(
+      users.map((u) => ({
+        id: u._id.toString(),
+        nom: u.nom,
+        email: u.email,
+        role: u.role,
+        actif: u.actif,
+        approvalStatus: u.approvalStatus || 'approved',
+        hasApprovalToken: !!u.approvalToken,
+        hasRejectionToken: !!u.rejectionToken,
+        createdAt: u.createdAt
+      }))
+    );
 
     process.exit(0);
   } catch (error) {

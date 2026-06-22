@@ -50,31 +50,21 @@ export class AuthService {
   }
 
   register(data: {
-    nom: string;
-    email: string;
-    password: string;
-    role?: string;
-  }): Observable<any> {
-    const payload = {
-      nom: data.nom.trim(),
-      email: data.email.trim().toLowerCase(),
-      password: data.password.trim(),
-      role: data.role || 'consultant'
-    };
+  nom: string;
+  email: string;
+  password: string;
+  role?: string;
+}): Observable<any> {
+  const payload = {
+    nom: data.nom.trim(),
+    email: data.email.trim().toLowerCase(),
+    password: data.password.trim(),
+    role: data.role || 'consultant'
+  };
 
-    return this.http.post(`${this.apiUrl}/register`, payload).pipe(
-      tap((response: any) => {
-        if (response?.token) {
-          localStorage.setItem('token', response.token);
-          sessionStorage.removeItem('token');
-        }
+  return this.http.post(`${this.apiUrl}/register`, payload);
+}
 
-        if (response?.user) {
-          localStorage.setItem('user', JSON.stringify(response.user));
-        }
-      })
-    );
-  }
 
   forgotPassword(email: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/forgot-password`, {

@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       trim: true
     },
+
     email: {
       type: String,
       required: true,
@@ -14,23 +15,49 @@ const userSchema = new mongoose.Schema(
       trim: true,
       lowercase: true
     },
+
     password: {
       type: String,
       required: true
     },
+
     role: {
       type: String,
       enum: ['admin', 'manager', 'consultant', 'agent_saisie'],
       default: 'consultant'
     },
+
     actif: {
       type: Boolean,
-      default: true
+      default: false
     },
+
+    approvalStatus: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected'],
+      default: 'pending'
+    },
+
+    approvalToken: {
+      type: String,
+      default: null
+    },
+
+    rejectionToken: {
+      type: String,
+      default: null
+    },
+
+    approvalTokenExpire: {
+      type: Date,
+      default: null
+    },
+
     resetPasswordToken: {
       type: String,
       default: null
     },
+
     resetPasswordExpire: {
       type: Date,
       default: null

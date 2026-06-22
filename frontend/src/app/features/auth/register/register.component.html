@@ -70,11 +70,10 @@
       <div class="form-group">
         <label>Rôle</label>
         <select formControlName="role">
-          <option value="consultant">Consultant</option>
-          <option value="manager">Manager</option>
-          <option value="agent_saisie">Agent de saisie</option>
-          <option value="admin">Admin</option>
-        </select>
+  <option value="consultant">Consultant</option>
+  <option value="manager">Manager</option>
+  <option value="agent_saisie">Agent de saisie</option>
+</select>
       </div>
 
       <button class="btn-primary" type="submit" [disabled]="loading">
@@ -86,6 +85,7 @@
       </button>
     </form>
 
-    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+<p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+<p class="success" *ngIf="successMessage">{{ successMessage }}</p>
   </div>
 </div>
