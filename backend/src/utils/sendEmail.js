@@ -10,7 +10,7 @@ const sendEmail = async ({ to, subject, html }) => {
   });
 
   await transporter.sendMail({
-    from: `"SmartDevis AI" <${process.env.MAIL_USER}>`,
+    from: `"SmartDevis" <${process.env.MAIL_USER}>`,
     to,
     subject,
     html

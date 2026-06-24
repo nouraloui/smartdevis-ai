@@ -19,10 +19,10 @@ export class AppComponent {
   mobileMenuOpen = false;
 
   menuItems = [
-    { label: 'Dashboard', route: '/dashboard', icon: 'pi pi-home' },
-    { label: 'Analyses IA', route: '/analyses-ia', icon: 'pi pi-chart-bar' },
-    { label: 'IA NLP', route: '/ia-nlp', icon: 'pi pi-sparkles' },
-    { label: 'Agent n8n', route: '/n8n-agent', icon: 'pi pi-comments' },
+    { label: 'Tableau de bord', route: '/dashboard', icon: 'pi pi-home' },
+    { label: 'Analyse IA', route: '/analyses-ia', icon: 'pi pi-chart-bar' },
+    { label: 'Analyse sémantique', route: '/ia-nlp', icon: 'pi pi-sparkles' },
+    { label: 'Assistant intelligent', route: '/n8n-agent', icon: 'pi pi-comments' },
     { label: 'Projets', route: '/projets', icon: 'pi pi-briefcase' },
     { label: 'Paramètres', route: '/parametres', icon: 'pi pi-cog' }
   ];

@@ -15,8 +15,7 @@ const askDevisAssistant = async (message) => {
             montant: d.total_ht,
             statut: d.status
         }));
-
-        // 3. Appel au service IA (FastAPI sur le port 8000 selon ton .env)
+       // 3. Appel au service IA (FastAPI sur le port 8000 selon ton .env)
         const response = await axios.post('http://localhost:8000/chat', {
             user_message: message,
             db_context: context
