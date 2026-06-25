@@ -1,36 +1,30 @@
-const nodemailer = require('nodemailer');
-const dns = require('dns');
-
-dns.setDefaultResultOrder('ipv4first');
+const { Resend } = require('resend');
 
 const sendEmail = async ({ to, subject, html }) => {
-  if (!process.env.MAIL_USER || !process.env.MAIL_PASS) {
-    throw new Error('Configuration email manquante : MAIL_USER ou MAIL_PASS absent.');
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error('Configuration email manquante : RESEND_API_KEY absent.');
   }
 
-  const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
-    requireTLS: true,
-    auth: {
-      user: process.env.MAIL_USER,
-      pass: process.env.MAIL_PASS
-    },
-    family: 4,
-    connectionTimeout: 15000,
-    greetingTimeout: 15000,
-    socketTimeout: 20000
-  });
+  const resend = new Resend(process.env.RESEND_API_KEY);
 
-  await transporter.verify();
+  const from =
+    process.env.MAIL_FROM || 'SmartDevis AI <onboarding@resend.dev>';
 
-  await transporter.sendMail({
-    from: `"SmartDevis AI" <${process.env.MAIL_USER}>`,
+  const { data, error } = await resend.emails.send({
+    from,
     to,
     subject,
     html
   });
+
+  if (error) {
+    console.error('Erreur Resend:', error);
+    throw new Error(error.message || 'Erreur lors de l’envoi de l’email.');
+  }
+
+  console.log('✅ Email envoyé avec Resend:', data?.id);
+
+  return data;
 };
 
 module.exports = sendEmail;
