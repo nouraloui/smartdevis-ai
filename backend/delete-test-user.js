@@ -13,7 +13,7 @@ const deleteTestUser = async () => {
 
     await mongoose.connect(process.env.MONGO_URI);
 
-    const email = 'nouraloui170@gmail.com';
+    const email = 'fouadchanoufi@gmail.com';
 
     const result = await User.deleteOne({
       email: email.trim().toLowerCase()
