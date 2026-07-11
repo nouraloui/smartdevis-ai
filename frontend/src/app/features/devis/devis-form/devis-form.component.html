@@ -166,16 +166,13 @@
               type="number"
               formControlName="puContratFcfaArrondi"
               placeholder="Exemple : 13284000"
+              [readonly]="isEditMode"
+              [class.readonly-input]="isEditMode"
             />
-          </div>
 
-          <div class="form-group">
-            <label>PU contrat exact FCFA</label>
-            <input
-              type="number"
-              formControlName="puContratFcfaExact"
-              placeholder="Exemple : 13283129.25"
-            />
+            <small class="readonly-help" *ngIf="isEditMode">
+              Cette valeur est verrouillée en modification.
+            </small>
           </div>
         </div>
       </div>

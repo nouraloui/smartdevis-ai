@@ -152,23 +152,27 @@ export class ProjetsComponent implements OnInit {
             err?.error?.message || 'Erreur lors de la modification.';
         }
       });
-    } else {
-      this.projetService.create(this.form).subscribe({
-        next: () => {
-          this.successMessage = 'Projet créé avec succès.';
-          this.activePage = 'list';
-          this.loadProjets();
-        },
-        error: (err) => {
-          this.errorMessage =
-            err?.error?.message || 'Erreur lors de la création.';
-        }
-      });
+
+      return;
     }
+
+    this.projetService.create(this.form).subscribe({
+      next: () => {
+        this.successMessage = 'Projet créé avec succès.';
+        this.activePage = 'list';
+        this.loadProjets();
+      },
+      error: (err) => {
+        this.errorMessage =
+          err?.error?.message || 'Erreur lors de la création.';
+      }
+    });
   }
 
   deleteProjet(id: string): void {
-    if (!confirm('Voulez-vous vraiment supprimer ce projet ?')) return;
+    if (!confirm('Voulez-vous vraiment supprimer ce projet ?')) {
+      return;
+    }
 
     this.projetService.delete(id).subscribe({
       next: () => {
@@ -182,11 +186,23 @@ export class ProjetsComponent implements OnInit {
     });
   }
 
-  openProjectDevis(p: any): void {
+  /* =====================================================
+     NAVIGATION PROFESSIONNELLE PHASE 1 / PHASE 2
+  ===================================================== */
+
+  openPhase1(p: any): void {
+    this.router.navigate(['/projets', p._id, 'devis-phase1']);
+  }
+
+  openPhase2(p: any): void {
     this.router.navigate(['/projets', p._id, 'devis']);
   }
 
-  createProjectDevis(p: any): void {
+  createPhase1(p: any): void {
+    this.router.navigate(['/projets', p._id, 'devis-phase1', 'new']);
+  }
+
+  createPhase2(p: any): void {
     this.router.navigate(['/projets', p._id, 'devis', 'new']);
   }
 

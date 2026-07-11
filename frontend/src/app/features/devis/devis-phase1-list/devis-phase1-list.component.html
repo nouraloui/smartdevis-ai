@@ -1,0 +1,365 @@
+<div class="devis-page">
+  <div class="page-hero">
+    <div class="hero-left">
+      <div class="hero-icon">📘</div>
+
+      <div>
+        <h2>Phase 1 — Devis interne</h2>
+        <p>
+          Calcul du prix unitaire site puis du prix unitaire contrat FCFA
+        </p>
+      </div>
+    </div>
+
+    <div class="hero-actions">
+      <button class="btn-back" type="button" (click)="goBackToProjects()">
+        ← Retour aux projets
+      </button>
+
+      <button class="btn-back" type="button" (click)="goToPhase2()">
+        Voir phase 2
+      </button>
+
+      <button class="btn-add" type="button" (click)="goToCreate()">
+        + Ajouter une ligne phase 1
+      </button>
+    </div>
+  </div>
+
+  <div class="project-context-card" *ngIf="projetId && projet">
+    <div class="project-context-header">
+      <div>
+        <span class="context-label">Projet actif</span>
+        <h3>{{ projet.nom || 'Projet sans nom' }}</h3>
+      </div>
+
+      <span class="project-pill">
+        {{ projet.code_projet || '-' }}
+      </span>
+    </div>
+
+    <div class="project-context-grid">
+      <div class="context-item">
+        <span>Code projet</span>
+        <strong>{{ projet.code_projet || '-' }}</strong>
+      </div>
+
+      <div class="context-item">
+        <span>Client</span>
+        <strong>{{ projet.client || '-' }}</strong>
+      </div>
+
+      <div class="context-item">
+        <span>Département</span>
+        <strong>{{ projet.departement || '-' }}</strong>
+      </div>
+
+      <div class="context-item">
+        <span>Chef de projet</span>
+        <strong>{{ projet.chef_projet || '-' }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="filters-card">
+    <div class="filter-group">
+      <label>Recherche</label>
+
+      <div class="search-box">
+        <span>🔎</span>
+        <input
+          type="text"
+          placeholder="Rechercher par section, désignation, catégorie..."
+          [(ngModel)]="search"
+          (input)="applyFilters()"
+        />
+      </div>
+    </div>
+
+    <button class="btn-reset" type="button" (click)="resetFilters()">
+      Réinitialiser
+    </button>
+  </div>
+
+  <p class="loading" *ngIf="loading">Chargement de la phase 1...</p>
+  <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+  <div class="table-card" *ngIf="!loading && filteredDevis.length > 0">
+    <div class="table-header">
+      <div>
+        <h3>Lignes de devis — Phase 1</h3>
+        <p>{{ filteredDevis.length }} ligne(s) trouvée(s)</p>
+      </div>
+    </div>
+
+    <div class="table-scroll">
+      <table class="devis-table phase1-excel-table">
+        <thead>
+          <tr>
+            <th rowspan="2" class="excel-section-header">N°</th>
+            <th rowspan="2" class="excel-designation-header">Désignation</th>
+
+            <th rowspan="2">Unité</th>
+            <th rowspan="2">Quantité</th>
+
+            <th colspan="1">Contrat</th>
+            <th colspan="2">Montant</th>
+            <th colspan="3">Prix de revient</th>
+
+            <th rowspan="2">Marge brute</th>
+            <th colspan="2">Frais de gestion</th>
+            <th colspan="2">Marge nette</th>
+
+            <th rowspan="2">Statut</th>
+            <th rowspan="2">Actions</th>
+          </tr>
+
+          <tr>
+            <th>PU arrondi FCFA</th>
+
+            <th>FCFA</th>
+            <th>EUR</th>
+
+            <th>Qté site</th>
+            <th>PU site EUR</th>
+            <th>Prix Euro</th>
+
+            <th>Euro</th>
+            <th>%</th>
+
+            <th>Euro</th>
+            <th>%</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <ng-container *ngFor="let d of filteredDevis; let i = index">
+            <tr
+              [class.excel-designation-row]="isFirstOfDesignation(i)"
+              [class.excel-categorie-row]="isFirstOfCategorie(i) && !isFirstOfDesignation(i)"
+              [class.excel-souscategorie-row]="d.ligneType === 'sous_categorie'"
+            >
+              <td class="excel-section-cell">
+                <span *ngIf="isFirstOfSection(i)">
+                  {{ d.section || '-' }}
+                </span>
+              </td>
+
+              <td class="excel-designation-cell">
+                <div *ngIf="isFirstOfDesignation(i)" class="excel-designation-title">
+                  {{ d.designation || '-' }}
+                </div>
+
+                <div *ngIf="isFirstOfCategorie(i)" class="excel-categorie-title">
+                  {{ d.categorie || '-' }}
+                </div>
+
+                <div
+                  *ngIf="d.ligneType === 'sous_categorie'"
+                  class="excel-souscategorie-title"
+                >
+                  {{ d.sousCategorie || '-' }}
+                </div>
+              </td>
+
+              <td>
+                <ng-container *ngIf="d.ligneType !== 'sous_categorie'">
+                  {{ d.unite || '-' }}
+                </ng-container>
+              </td>
+
+              <td>
+                <ng-container *ngIf="d.ligneType !== 'sous_categorie'">
+                  {{ d.quantite || 0 }}
+                </ng-container>
+              </td>
+
+              <td>
+                <ng-container *ngIf="d.ligneType !== 'sous_categorie'">
+                  {{ d.puContratFcfaArrondi || 0 | number:'1.0-0' }}
+                </ng-container>
+              </td>
+
+              <td>
+                <ng-container *ngIf="d.ligneType !== 'sous_categorie'">
+                  {{ d.montantFcfa || 0 | number:'1.0-0' }}
+                </ng-container>
+              </td>
+
+              <td>
+                <ng-container *ngIf="d.ligneType !== 'sous_categorie'">
+                  {{ d.montantEur || 0 | number:'1.0-0' }}
+                </ng-container>
+              </td>
+
+              <td>{{ d.quantiteSite || 0 }}</td>
+              <td>{{ d.puSiteEur || 0 | number:'1.0-0' }}</td>
+              <td>{{ d.prixRevientEur || 0 | number:'1.0-0' }}</td>
+
+              <td>
+                <ng-container *ngIf="d.ligneType !== 'sous_categorie'">
+                  {{ d.margeBruteEur || 0 | number:'1.0-0' }}
+                </ng-container>
+              </td>
+
+              <td>
+                <ng-container *ngIf="d.ligneType !== 'sous_categorie'">
+                  {{ d.fraisGestionEur || 0 | number:'1.0-0' }}
+                </ng-container>
+              </td>
+
+              <td>
+                <ng-container *ngIf="d.ligneType !== 'sous_categorie'">
+                  {{ d.tauxFg || 0 | percent:'1.0-1' }}
+                </ng-container>
+              </td>
+
+              <td>
+                <ng-container *ngIf="d.ligneType !== 'sous_categorie'">
+                  {{ d.margeNetteEur || 0 | number:'1.0-0' }}
+                </ng-container>
+              </td>
+
+              <td>
+                <ng-container *ngIf="d.ligneType !== 'sous_categorie'">
+                  <span
+                    class="badge"
+                    [class.badge-positive]="(d.margeNettePct || 0) >= 0"
+                    [class.badge-negative]="(d.margeNettePct || 0) < 0"
+                  >
+                    {{ d.margeNettePct || 0 | number:'1.0-1' }}%
+                  </span>
+                </ng-container>
+              </td>
+
+              <td>
+                <span class="status">{{ d.statut }}</span>
+              </td>
+
+              <td class="actions-cell">
+                <button class="btn-edit" type="button" (click)="goToEdit(d._id)">
+                  Modifier
+                </button>
+
+                <button
+                  *ngIf="d.source !== 'mysql'"
+                  class="btn-delete"
+                  type="button"
+                  (click)="delete(d._id)"
+                >
+                  Supprimer
+                </button>
+              </td>
+            </tr>
+
+            <tr class="subtotal-row" *ngIf="isLastOfSection(i)">
+              <td></td>
+
+              <td class="subtotal-label">
+                S/TOTAL {{ d.section }}
+              </td>
+
+              <td></td>
+              <td></td>
+              <td></td>
+
+              <td>
+                {{ getSectionTotal(d.section).montantFcfa | number:'1.0-0' }}
+              </td>
+
+              <td>
+                {{ getSectionTotal(d.section).montantEur | number:'1.0-0' }}
+              </td>
+
+              <td></td>
+              <td></td>
+
+              <td>
+                {{ getSectionTotal(d.section).prixRevientEur | number:'1.0-0' }}
+              </td>
+
+              <td>
+                {{ getSectionTotal(d.section).margeBruteEur | number:'1.0-0' }}
+              </td>
+
+              <td>
+                {{ getSectionTotal(d.section).fraisGestionEur | number:'1.0-0' }}
+              </td>
+
+              <td></td>
+
+              <td>
+                {{ getSectionTotal(d.section).margeNetteEur | number:'1.0-0' }}
+              </td>
+
+              <td>
+                {{ getSectionTotal(d.section).margeNettePct | number:'1.0-1' }}%
+              </td>
+
+              <td></td>
+              <td></td>
+            </tr>
+          </ng-container>
+
+          <tr class="general-total-row">
+            <td></td>
+
+            <td class="general-total-label">
+              TOTAL GÉNÉRAL PHASE A1 : CONTRÔLE DES TRAVAUX
+            </td>
+
+            <td></td>
+            <td></td>
+            <td></td>
+
+            <td>
+              {{ getGeneralTotal().montantFcfa | number:'1.0-0' }}
+            </td>
+
+            <td>
+              {{ getGeneralTotal().montantEur | number:'1.0-0' }}
+            </td>
+
+            <td></td>
+            <td></td>
+
+            <td>
+              {{ getGeneralTotal().prixRevientEur | number:'1.0-0' }}
+            </td>
+
+            <td>
+              {{ getGeneralTotal().margeBruteEur | number:'1.0-0' }}
+            </td>
+
+            <td>
+              {{ getGeneralTotal().fraisGestionEur | number:'1.0-0' }}
+            </td>
+
+            <td></td>
+
+            <td>
+              {{ getGeneralTotal().margeNetteEur | number:'1.0-0' }}
+            </td>
+
+            <td class="general-total-percent">
+              {{ getGeneralTotal().margeNettePct | number:'1.0-1' }}%
+            </td>
+
+            <td></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && filteredDevis.length === 0">
+    <div class="empty-icon">📘</div>
+    <h3>Aucune ligne phase 1 trouvée</h3>
+    <p>Ajoutez une première ligne pour calculer le devis interne phase 1.</p>
+
+    <button class="btn-add empty-btn" type="button" (click)="goToCreate()">
+      + Ajouter une ligne phase 1
+    </button>
+  </div>
+</div>

@@ -29,6 +29,8 @@ export class DevisFormComponent implements OnInit {
   projetId: string | null = null;
   projet: any = null;
 
+  originalPuContratFcfaArrondi = 0;
+
   devisForm = this.fb.group({
     section: ['A', Validators.required],
     designation: ['', Validators.required],
@@ -38,7 +40,6 @@ export class DevisFormComponent implements OnInit {
 
     quantite: [0],
     puContratFcfaArrondi: [0],
-    puContratFcfaExact: [0],
 
     quantiteSite: [0],
     prixRevientEur: [0],
@@ -80,6 +81,8 @@ export class DevisFormComponent implements OnInit {
       next: (res: any) => {
         const d = res?.data || {};
 
+        this.originalPuContratFcfaArrondi = d.puContratFcfaArrondi || 0;
+
         this.devisForm.patchValue({
           section: d.section || 'A',
           designation: d.designation || '',
@@ -89,7 +92,6 @@ export class DevisFormComponent implements OnInit {
 
           quantite: d.quantite || 0,
           puContratFcfaArrondi: d.puContratFcfaArrondi || 0,
-          puContratFcfaExact: d.puContratFcfaExact || 0,
 
           quantiteSite: d.quantiteSite || 0,
           prixRevientEur: d.prixRevientEur || 0,
@@ -118,17 +120,22 @@ export class DevisFormComponent implements OnInit {
     this.errorMessage = '';
 
     const rawData = this.devisForm.getRawValue();
-
     const tauxFgPercent = Number(rawData.tauxFg) || 0;
 
-    const data = {
+    const data: any = {
       ...rawData,
+
+      phase: 'phase2',
 
       tauxFg: tauxFgPercent / 100,
 
       projet: this.projetId,
-      code_projet: this.projet?.code_projet || ''
+      code_projet: this.projet?.code_projet || 'DI-M3'
     };
+
+    if (this.isEditMode) {
+      data.puContratFcfaArrondi = this.originalPuContratFcfaArrondi;
+    }
 
     if (this.isEditMode && this.devisId) {
       this.devisService.updateDevis(this.devisId, data).subscribe({

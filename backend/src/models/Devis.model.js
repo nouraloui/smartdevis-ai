@@ -2,6 +2,12 @@ const mongoose = require('mongoose');
 
 const devisSchema = new mongoose.Schema(
   {
+    phase: {
+      type: String,
+      enum: ['phase1', 'phase2'],
+      default: 'phase2'
+    },
+
     projet: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Projet',
@@ -84,6 +90,11 @@ const devisSchema = new mongoose.Schema(
       default: 0
     },
 
+    coefficientContrat: {
+      type: Number,
+      default: 1.5
+    },
+
     margeBruteEur: {
       type: Number,
       default: 0
@@ -96,7 +107,7 @@ const devisSchema = new mongoose.Schema(
 
     tauxFg: {
       type: Number,
-      default: 0
+      default: 0.05
     },
 
     margeNetteEur: {

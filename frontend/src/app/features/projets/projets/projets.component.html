@@ -155,15 +155,55 @@
             </div>
           </div>
 
+          <!-- =========================
+               CHOIX PROFESSIONNEL PHASE 1 / PHASE 2
+          ========================== -->
+          <div class="phase-box">
+            <div class="phase-box-title">
+              <span>📌</span>
+              <strong>Choisir la phase de devis</strong>
+            </div>
+
+            <div class="phase-actions">
+              <button
+                class="btn-phase phase1"
+                type="button"
+                (click)="openPhase1(p)"
+              >
+                Phase 1
+                <small>Offre financière</small>
+              </button>
+
+              <button
+                class="btn-phase phase2"
+                type="button"
+                (click)="openPhase2(p)"
+              >
+                Phase 2
+                <small>Prix de revient</small>
+              </button>
+            </div>
+
+            <div class="phase-create-actions">
+              <button
+                class="btn-create-phase"
+                type="button"
+                (click)="createPhase1(p)"
+              >
+                + Créer phase 1
+              </button>
+
+              <button
+                class="btn-create-phase"
+                type="button"
+                (click)="createPhase2(p)"
+              >
+                + Créer phase 2
+              </button>
+            </div>
+          </div>
+
           <div class="project-actions">
-            <button class="btn-devis" type="button" (click)="openProjectDevis(p)">
-              Voir les devis
-            </button>
-
-            <button class="btn-create-devis" type="button" (click)="createProjectDevis(p)">
-              + Créer des devis
-            </button>
-
             <button class="btn-edit" type="button" (click)="editProjet(p)">
               Modifier
             </button>

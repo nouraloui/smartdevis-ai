@@ -10,12 +10,19 @@ export class DevisService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/devis`;
 
-  getAllDevis(projetId?: string | null): Observable<any> {
-    const url = projetId
-      ? `${this.apiUrl}?projet=${projetId}`
-      : this.apiUrl;
+  getAllDevis(
+    projetId?: string | null,
+    phase: 'phase1' | 'phase2' = 'phase2'
+  ): Observable<any> {
+    const params: string[] = [];
 
-    return this.http.get(url);
+    if (projetId) {
+      params.push(`projet=${projetId}`);
+    }
+
+    params.push(`phase=${phase}`);
+
+    return this.http.get(`${this.apiUrl}?${params.join('&')}`);
   }
 
   getDevisById(id: string): Observable<any> {

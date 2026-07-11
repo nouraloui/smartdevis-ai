@@ -13,6 +13,8 @@ import { ProjetsComponent } from './features/projets/projets/projets.component';
 import { ParametresComponent } from './features/parametres/parametres/parametres.component';
 import { IaNlpComponent } from './features/ia-nlp/ia-nlp/ia-nlp.component';
 import { N8nAgentComponent } from './features/n8n-agent/n8n-agent/n8n-agent.component';
+import { DevisPhase1ListComponent } from './features/devis/devis-phase1-list/devis-phase1-list.component';
+import { DevisPhase1FormComponent } from './features/devis/devis-phase1-form/devis-phase1-form.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -88,6 +90,32 @@ export const routes: Routes = [
     component: N8nAgentComponent,
     canActivate: [authGuard]
   } ,
+
+  {
+  path: 'projets/:projetId/devis',
+  component: DevisListComponent
+},
+{
+  path: 'projets/:projetId/devis/new',
+  component: DevisFormComponent
+},
+{
+  path: 'projets/:projetId/devis/edit/:id',
+  component: DevisFormComponent
+},
+
+{
+  path: 'projets/:projetId/devis-phase1',
+  component: DevisPhase1ListComponent
+},
+{
+  path: 'projets/:projetId/devis-phase1/new',
+  component: DevisPhase1FormComponent
+},
+{
+  path: 'projets/:projetId/devis-phase1/edit/:id',
+  component: DevisPhase1FormComponent
+},
 
   // Fallback
   { path: '**', redirectTo: 'login' }

@@ -298,6 +298,30 @@
 }
 
 /* ===============================
+   READONLY FIELD
+================================ */
+
+.readonly-input {
+  background: #f1f5f9 !important;
+  color: #64748b !important;
+  cursor: not-allowed !important;
+  border-color: #cbd5e1 !important;
+}
+
+.readonly-input:focus {
+  box-shadow: none !important;
+  border-color: #cbd5e1 !important;
+}
+
+.readonly-help {
+  display: block;
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ===============================
    ERROR
 ================================ */
 
@@ -582,6 +606,10 @@
 
   .form-group input::placeholder {
     font-size: 10px;
+  }
+
+  .readonly-help {
+    font-size: 9.5px;
   }
 
   .error-card {
