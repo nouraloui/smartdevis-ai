@@ -243,19 +243,18 @@
               </td>
 
               <td class="actions-cell">
-                <button class="btn-edit" type="button" (click)="goToEdit(d._id)">
-                  Modifier
-                </button>
+  <button class="btn-edit" type="button" (click)="goToEdit(d._id)">
+    Modifier
+  </button>
 
-                <button
-                  *ngIf="d.source !== 'mysql'"
-                  class="btn-delete"
-                  type="button"
-                  (click)="delete(d._id)"
-                >
-                  Supprimer
-                </button>
-              </td>
+  <button
+    class="btn-delete"
+    type="button"
+    (click)="delete(d._id)"
+  >
+    Supprimer
+  </button>
+</td>
             </tr>
 
             <tr class="subtotal-row" *ngIf="isLastOfSection(i)">
