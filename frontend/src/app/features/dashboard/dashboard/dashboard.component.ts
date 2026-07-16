@@ -166,16 +166,29 @@ export class DashboardComponent implements OnInit {
 
     this.clearDrillDown();
     this.loadDashboard();
+    this.scrollToDashboardTop();
   }
 
   setActivePage(page: DashboardPage): void {
     if (page === 'couts' && this.codeProjet !== 'DI-M3') {
       this.activePage = 'global';
+      this.scrollToDashboardTop();
       return;
     }
 
     this.activePage = page;
     this.clearDrillDown();
+    this.scrollToDashboardTop();
+  }
+
+  private scrollToDashboardTop(): void {
+    setTimeout(() => {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'smooth'
+      });
+    }, 0);
   }
 
   onCategoryLimitChange(): void {
