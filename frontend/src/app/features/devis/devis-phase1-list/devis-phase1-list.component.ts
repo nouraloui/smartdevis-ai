@@ -107,40 +107,42 @@ export class DevisPhase1ListComponent implements OnInit {
   }
 
   loadDevisPhase1(): void {
-    this.loading = true;
-    this.errorMessage = '';
+  this.loading = true;
+  this.errorMessage = '';
 
-    this.devisService.getAllDevis(this.projetId, 'phase1').subscribe({
-      next: (response: any) => {
-        this.devis = response?.data || [];
-        this.filteredDevis = [...this.devis];
-        this.loading = false;
-      },
-      error: (err: any) => {
-        this.loading = false;
-        this.errorMessage =
-          err?.error?.message || 'Erreur lors du chargement de la phase 1.';
-      }
-    });
-  }
+  this.devisService.getAllDevis(this.projetId, 'phase1').subscribe({
+    next: (response: any) => {
+      this.devis = this.orderDevisBySection(response?.data || []);
+      this.filteredDevis = [...this.devis];
+      this.loading = false;
+    },
+    error: (err: any) => {
+      this.loading = false;
+      this.errorMessage =
+        err?.error?.message || 'Erreur lors du chargement de la phase 1.';
+    }
+  });
+}
 
   applyFilters(): void {
-    const search = this.search.trim().toLowerCase();
+  const search = this.search.trim().toLowerCase();
 
-    this.filteredDevis = this.devis.filter((d) => {
-      const section = String(d.section || '').toLowerCase();
-      const designation = String(d.designation || '').toLowerCase();
-      const categorie = String(d.categorie || '').toLowerCase();
-      const sousCategorie = String(d.sousCategorie || '').toLowerCase();
+  const result = this.devis.filter((d) => {
+    const section = String(d.section || '').toLowerCase();
+    const designation = String(d.designation || '').toLowerCase();
+    const categorie = String(d.categorie || '').toLowerCase();
+    const sousCategorie = String(d.sousCategorie || '').toLowerCase();
 
-      return search
-        ? section.includes(search) ||
-            designation.includes(search) ||
-            categorie.includes(search) ||
-            sousCategorie.includes(search)
-        : true;
-    });
-  }
+    return search
+      ? section.includes(search) ||
+          designation.includes(search) ||
+          categorie.includes(search) ||
+          sousCategorie.includes(search)
+      : true;
+  });
+
+  this.filteredDevis = this.orderDevisBySection(result);
+}
 
   resetFilters(): void {
     this.search = '';
@@ -193,6 +195,48 @@ export class DevisPhase1ListComponent implements OnInit {
       }
     });
   }
+
+  private orderDevisBySection(lines: any[]): any[] {
+  const sectionOrder: Record<string, number> = {
+    A: 1,
+    B: 2,
+    C: 3,
+    D: 4
+  };
+
+  return [...lines].sort((a, b) => {
+    const sectionA = String(a.section || '').toUpperCase();
+    const sectionB = String(b.section || '').toUpperCase();
+
+    const orderA = sectionOrder[sectionA] || 999;
+    const orderB = sectionOrder[sectionB] || 999;
+
+    if (orderA !== orderB) {
+      return orderA - orderB;
+    }
+
+    /*
+      Dans une même section :
+      - les lignes MySQL restent d'abord
+      - les lignes créées via CRUD viennent à la fin de la section
+    */
+    const sourceA = a.source === 'mysql' ? 0 : 1;
+    const sourceB = b.source === 'mysql' ? 0 : 1;
+
+    if (sourceA !== sourceB) {
+      return sourceA - sourceB;
+    }
+
+    /*
+      Pour les lignes CRUD d'une même section,
+      on garde l'ordre de création.
+    */
+    const dateA = new Date(a.createdAt || 0).getTime();
+    const dateB = new Date(b.createdAt || 0).getTime();
+
+    return dateA - dateB;
+  });
+}
 
   getProjectLabel(): string {
     if (!this.projet) {

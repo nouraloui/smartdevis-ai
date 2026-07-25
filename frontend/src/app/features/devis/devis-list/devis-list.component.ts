@@ -113,7 +113,7 @@ export class DevisListComponent implements OnInit {
 
     this.devisService.getAllDevis(this.projetId, 'phase2').subscribe({
       next: (response: any) => {
-        this.devis = response?.data || [];
+        this.devis = this.orderDevisBySection(response?.data || []);
         this.filteredDevis = [...this.devis];
         this.loading = false;
       },
@@ -128,7 +128,7 @@ export class DevisListComponent implements OnInit {
   applyFilters(): void {
     const search = this.search.trim().toLowerCase();
 
-    this.filteredDevis = this.devis.filter((d) => {
+    const result = this.devis.filter((d) => {
       const section = String(d.section || '').toLowerCase();
       const designation = String(d.designation || '').toLowerCase();
       const categorie = String(d.categorie || '').toLowerCase();
@@ -141,11 +141,13 @@ export class DevisListComponent implements OnInit {
             sousCategorie.includes(search)
         : true;
     });
+
+    this.filteredDevis = this.orderDevisBySection(result);
   }
 
   resetFilters(): void {
     this.search = '';
-    this.filteredDevis = [...this.devis];
+    this.filteredDevis = this.orderDevisBySection(this.devis);
   }
 
   goToCreate(): void {
@@ -183,6 +185,54 @@ export class DevisListComponent implements OnInit {
         this.errorMessage =
           err?.error?.message || 'Erreur lors de la suppression.';
       }
+    });
+  }
+
+  /**
+   * Cette fonction permet d'afficher les lignes CRUD dans la bonne section.
+   * Exemple :
+   * Section A : lignes MySQL + lignes CRUD ajoutées en A + S/TOTAL A
+   * Section B : lignes MySQL + lignes CRUD ajoutées en B + S/TOTAL B
+   */
+  private orderDevisBySection(lines: any[]): any[] {
+    const sectionOrder: Record<string, number> = {
+      A: 1,
+      B: 2,
+      C: 3,
+      D: 4
+    };
+
+    return [...lines].sort((a, b) => {
+      const sectionA = String(a.section || '').toUpperCase();
+      const sectionB = String(b.section || '').toUpperCase();
+
+      const orderA = sectionOrder[sectionA] || 999;
+      const orderB = sectionOrder[sectionB] || 999;
+
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      }
+
+      /*
+        Dans la même section :
+        - les lignes MySQL restent d'abord
+        - les lignes ajoutées depuis l'application viennent à la fin de la section
+      */
+      const sourceA = a.source === 'mysql' ? 0 : 1;
+      const sourceB = b.source === 'mysql' ? 0 : 1;
+
+      if (sourceA !== sourceB) {
+        return sourceA - sourceB;
+      }
+
+      /*
+        Si les deux lignes sont du même type,
+        on garde l'ordre MySQL naturel ou l'ordre de création CRUD.
+      */
+      const dateA = new Date(a.createdAt || 0).getTime();
+      const dateB = new Date(b.createdAt || 0).getTime();
+
+      return dateA - dateB;
     });
   }
 

@@ -53,11 +53,15 @@ const normalizePhase = (value) => {
   const phase = String(value || 'phase2').toLowerCase();
 
   if (phase === 'phase1') return 'phase1';
+
   return 'phase2';
 };
 
 const isMysqlSyntheticId = (id) => {
-  return String(id || '').startsWith('phase1_') || String(id || '').startsWith('phase2_');
+  return (
+    String(id || '').startsWith('phase1_') ||
+    String(id || '').startsWith('phase2_')
+  );
 };
 
 const parseMysqlSyntheticId = (id) => {
@@ -68,7 +72,12 @@ const parseMysqlSyntheticId = (id) => {
   const idCategorie = parts[2];
   const codeProjet = parts.slice(3).join('_');
 
-  if (!['phase1', 'phase2'].includes(phase) || !idPersonnel || !idCategorie || !codeProjet) {
+  if (
+    !['phase1', 'phase2'].includes(phase) ||
+    !idPersonnel ||
+    !idCategorie ||
+    !codeProjet
+  ) {
     throw new Error('Identifiant MySQL invalide.');
   }
 
@@ -473,10 +482,6 @@ const getAllDevis = async (req, res) => {
     const selectedPhase = normalizePhase(phase);
     const codeProjet = String(projetDoc.code_projet || '').toUpperCase();
 
-    /*
-      DI-M3 :
-      phase1 et phase2 viennent maintenant de MySQL.
-    */
     if (codeProjet === 'DI-M3' || codeProjet === 'DI') {
       const lignesMySQL = await buildDiM3DevisData(projetDoc, selectedPhase);
 
@@ -484,23 +489,32 @@ const getAllDevis = async (req, res) => {
         projet: projetDoc._id,
         phase: selectedPhase
       })
-        .sort({ createdAt: -1 })
+        .sort({ createdAt: 1 })
         .lean();
 
       const devisCrudCalcules = devisCrud.map((ligne) => {
-  const ligneObj = {
-    ...ligne,
-    _id: String(ligne._id),
-    source: 'devis',
-    ligneType: ligne.sousCategorie && ligne.sousCategorie !== '-' ? 'sous_categorie' : 'categorie'
-  };
+        const ligneObj = {
+          ...ligne,
+          _id: String(ligne._id),
+          source: 'devis',
 
-  if (selectedPhase === 'phase1') {
-    return calculerDevisPhase1(ligneObj);
-  }
+          /*
+            IMPORTANT :
+            Une ligne créée depuis l'application doit rester une ligne calculable.
+            Même si elle contient une sous-catégorie, on ne la considère PAS
+            comme une ligne enfant Excel.
+          */
+          ligneType: 'categorie',
+          isParentLine: true,
+          hasSousCategories: false
+        };
 
-  return calculerDevisPhase2(ligneObj);
-});
+        if (selectedPhase === 'phase1') {
+          return calculerDevisPhase1(ligneObj);
+        }
+
+        return calculerDevisPhase2(ligneObj);
+      });
 
       const data = [...lignesMySQL, ...devisCrudCalcules];
 
@@ -512,28 +526,33 @@ const getAllDevis = async (req, res) => {
       });
     }
 
-    /*
-      Autres projets : MongoDB uniquement.
-    */
     const devisProjet = await Devis.find({
       projet: projetDoc._id,
       phase: selectedPhase
     })
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: 1 })
       .lean();
 
     const devisProjetCalcules = devisProjet.map((ligne) => {
+      const ligneObj = {
+        ...ligne,
+        _id: String(ligne._id),
+        source: 'devis',
+
+        /*
+          Même règle pour les autres projets :
+          les lignes CRUD sont toujours des lignes calculables.
+        */
+        ligneType: 'categorie',
+        isParentLine: true,
+        hasSousCategories: false
+      };
+
       if (selectedPhase === 'phase1') {
-        return calculerDevisPhase1({
-          ...ligne,
-          source: 'devis'
-        });
+        return calculerDevisPhase1(ligneObj);
       }
 
-      return calculerDevisPhase2({
-        ...ligne,
-        source: 'devis'
-      });
+      return calculerDevisPhase2(ligneObj);
     });
 
     return res.json({
@@ -560,10 +579,6 @@ const getDevisById = async (req, res, next) => {
   try {
     const id = req.params.id;
 
-    /*
-      Cas MySQL :
-      id exemple : phase1_2199_2199_DI-M3
-    */
     if (isMysqlSyntheticId(id)) {
       const mysqlDevis = await getMySqlDevisBySyntheticId(id);
 
@@ -580,9 +595,6 @@ const getDevisById = async (req, res, next) => {
       });
     }
 
-    /*
-      Cas MongoDB.
-    */
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
         success: false,
@@ -599,9 +611,17 @@ const getDevisById = async (req, res, next) => {
       });
     }
 
+    const devisCalcule = calculerDevis({
+      ...devis.toObject(),
+      source: 'devis',
+      ligneType: 'categorie',
+      isParentLine: true,
+      hasSousCategories: false
+    });
+
     return res.json({
       success: true,
-      data: calculerDevis(devis.toObject())
+      data: devisCalcule
     });
   } catch (err) {
     next(err);
@@ -614,13 +634,27 @@ const getDevisById = async (req, res, next) => {
 
 const createDevis = async (req, res, next) => {
   try {
-    const data = calculerDevis(req.body);
+    const data = calculerDevis({
+      ...req.body,
+      source: 'devis',
+      ligneType: 'categorie',
+      isParentLine: true,
+      hasSousCategories: false
+    });
 
     const devis = await Devis.create(data);
 
+    const devisCalcule = calculerDevis({
+      ...devis.toObject(),
+      source: 'devis',
+      ligneType: 'categorie',
+      isParentLine: true,
+      hasSousCategories: false
+    });
+
     return res.status(201).json({
       success: true,
-      data: devis
+      data: devisCalcule
     });
   } catch (err) {
     next(err);
@@ -635,9 +669,6 @@ const updateDevis = async (req, res, next) => {
   try {
     const id = req.params.id;
 
-    /*
-      Cas 1 : Update ligne MySQL.
-    */
     if (isMysqlSyntheticId(id)) {
       const { phase, idPersonnel, idCategorie, codeProjet } =
         parseMysqlSyntheticId(id);
@@ -659,9 +690,6 @@ const updateDevis = async (req, res, next) => {
               phase: 'phase2'
             });
 
-      /*
-        Update dim_categorie
-      */
       await pool.query(
         `
         UPDATE dim_categorie
@@ -674,14 +702,13 @@ const updateDevis = async (req, res, next) => {
         [
           data.section || '-',
           data.designation || '-',
-          data.sousCategorie && data.sousCategorie !== '-' ? data.sousCategorie : '',
+          data.sousCategorie && data.sousCategorie !== '-'
+            ? data.sousCategorie
+            : '',
           idCategorie
         ]
       );
 
-      /*
-        Update dim_personnel
-      */
       await pool.query(
         `
         UPDATE dim_personnel
@@ -694,14 +721,13 @@ const updateDevis = async (req, res, next) => {
         [
           data.categorie || '-',
           data.unite || '-',
-          data.sousCategorie && data.sousCategorie !== '-' ? data.sousCategorie : '',
+          data.sousCategorie && data.sousCategorie !== '-'
+            ? data.sousCategorie
+            : '',
           idPersonnel
         ]
       );
 
-      /*
-        Récupérer id_cout
-      */
       const [factRows] = await pool.query(
         `
         SELECT id_cout
@@ -724,9 +750,6 @@ const updateDevis = async (req, res, next) => {
 
       const idCout = factRows[0].id_cout;
 
-      /*
-        Update dim_cout
-      */
       await pool.query(
         `
         UPDATE dim_cout
@@ -752,9 +775,6 @@ const updateDevis = async (req, res, next) => {
         ]
       );
 
-      /*
-        Update fact_ligne_devis
-      */
       await pool.query(
         `
         UPDATE fact_ligne_devis
@@ -796,9 +816,6 @@ const updateDevis = async (req, res, next) => {
       });
     }
 
-    /*
-      Cas 2 : Update ligne MongoDB.
-    */
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
         success: false,
@@ -817,16 +834,28 @@ const updateDevis = async (req, res, next) => {
 
     const data = calculerDevis({
       ...oldDevis,
-      ...req.body
+      ...req.body,
+      source: 'devis',
+      ligneType: 'categorie',
+      isParentLine: true,
+      hasSousCategories: false
     });
 
     const devis = await Devis.findByIdAndUpdate(id, data, {
       new: true
     });
 
+    const devisCalcule = calculerDevis({
+      ...devis.toObject(),
+      source: 'devis',
+      ligneType: 'categorie',
+      isParentLine: true,
+      hasSousCategories: false
+    });
+
     return res.json({
       success: true,
-      data: devis
+      data: devisCalcule
     });
   } catch (err) {
     next(err);
@@ -841,9 +870,6 @@ const deleteDevis = async (req, res, next) => {
   try {
     const id = req.params.id;
 
-    /*
-      Delete ligne MySQL.
-    */
     if (isMysqlSyntheticId(id)) {
       const { phase, idPersonnel, idCategorie, codeProjet } =
         parseMysqlSyntheticId(id);
@@ -912,9 +938,6 @@ const deleteDevis = async (req, res, next) => {
       });
     }
 
-    /*
-      Delete ligne MongoDB.
-    */
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
         success: false,
@@ -962,7 +985,13 @@ const analyseIA = async (req, res, next) => {
         });
       }
 
-      devisCalcule = calculerDevis(devis.toObject());
+      devisCalcule = calculerDevis({
+        ...devis.toObject(),
+        source: 'devis',
+        ligneType: 'categorie',
+        isParentLine: true,
+        hasSousCategories: false
+      });
     }
 
     if (!devisCalcule) {

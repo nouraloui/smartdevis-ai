@@ -20,6 +20,8 @@ export class DevisFormComponent implements OnInit {
   private devisService = inject(DevisService);
   private projetService = inject(ProjetService);
 
+  readonly tauxEurFcfa = 655.957;
+
   loading = false;
   errorMessage = '';
 
@@ -110,6 +112,60 @@ export class DevisFormComponent implements OnInit {
     });
   }
 
+  get numberData() {
+    const raw = this.devisForm.getRawValue();
+
+    return {
+      quantite: Number(raw.quantite) || 0,
+      puContratFcfaArrondi: Number(raw.puContratFcfaArrondi) || 0,
+      quantiteSite: Number(raw.quantiteSite) || 0,
+      prixRevientEur: Number(raw.prixRevientEur) || 0,
+      tauxFg: (Number(raw.tauxFg) || 0) / 100
+    };
+  }
+
+  get puContratFcfaArrondi(): number {
+    if (this.isEditMode) {
+      return this.originalPuContratFcfaArrondi;
+    }
+
+    return this.numberData.puContratFcfaArrondi;
+  }
+
+  get montantFcfa(): number {
+    const d = this.numberData;
+    return d.quantite * this.puContratFcfaArrondi;
+  }
+
+  get montantEur(): number {
+    return this.montantFcfa / this.tauxEurFcfa;
+  }
+
+  get puSiteEur(): number {
+    const d = this.numberData;
+    return d.quantiteSite > 0 ? d.prixRevientEur / d.quantiteSite : 0;
+  }
+
+  get margeBruteEur(): number {
+    const d = this.numberData;
+    return this.montantEur - d.prixRevientEur;
+  }
+
+  get fraisGestionEur(): number {
+    const d = this.numberData;
+    return d.prixRevientEur * d.tauxFg;
+  }
+
+  get margeNetteEur(): number {
+    return this.margeBruteEur - this.fraisGestionEur;
+  }
+
+  get margeNettePct(): number {
+    return this.montantEur > 0
+      ? (this.margeNetteEur / this.montantEur) * 100
+      : 0;
+  }
+
   onSubmit(): void {
     if (this.devisForm.invalid) {
       this.devisForm.markAllAsTouched();
@@ -120,22 +176,38 @@ export class DevisFormComponent implements OnInit {
     this.errorMessage = '';
 
     const rawData = this.devisForm.getRawValue();
-    const tauxFgPercent = Number(rawData.tauxFg) || 0;
 
     const data: any = {
       ...rawData,
 
       phase: 'phase2',
 
-      tauxFg: tauxFgPercent / 100,
-
       projet: this.projetId,
-      code_projet: this.projet?.code_projet || 'DI-M3'
-    };
+      code_projet: this.projet?.code_projet || 'DI-M3',
 
-    if (this.isEditMode) {
-      data.puContratFcfaArrondi = this.originalPuContratFcfaArrondi;
-    }
+      quantite: Number(rawData.quantite) || 0,
+      puContratFcfaArrondi: this.puContratFcfaArrondi,
+      puContratFcfaExact: this.puContratFcfaArrondi,
+
+      montantFcfa: this.montantFcfa,
+      montantEur: this.montantEur,
+
+      quantiteSite: Number(rawData.quantiteSite) || 0,
+      prixRevientEur: Number(rawData.prixRevientEur) || 0,
+      puSiteEur: this.puSiteEur,
+
+      tauxFg: (Number(rawData.tauxFg) || 0) / 100,
+      fraisGestionEur: this.fraisGestionEur,
+
+      margeBruteEur: this.margeBruteEur,
+      margeNetteEur: this.margeNetteEur,
+      margeNettePct: this.margeNettePct,
+
+      tauxEurFcfa: this.tauxEurFcfa,
+
+      ligneType: 'categorie',
+      source: 'devis'
+    };
 
     if (this.isEditMode && this.devisId) {
       this.devisService.updateDevis(this.devisId, data).subscribe({

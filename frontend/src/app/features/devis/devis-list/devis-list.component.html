@@ -152,21 +152,24 @@
               </td>
 
               <td class="excel-designation-cell">
-                <div *ngIf="isFirstOfDesignation(i)" class="excel-designation-title">
-                  {{ d.designation || '-' }}
-                </div>
+  <div *ngIf="isFirstOfDesignation(i)" class="excel-designation-title">
+    {{ d.designation || '-' }}
+  </div>
 
-                <div *ngIf="isFirstOfCategorie(i)" class="excel-categorie-title">
-                  {{ d.categorie || '-' }}
-                </div>
+  <div *ngIf="isFirstOfCategorie(i)" class="excel-categorie-title">
+    {{ d.categorie || '-' }}
+  </div>
 
-                <div
-                  *ngIf="d.ligneType === 'sous_categorie'"
-                  class="excel-souscategorie-title"
-                >
-                  {{ d.sousCategorie || '-' }}
-                </div>
-              </td>
+  <div
+    *ngIf="
+      d.ligneType === 'sous_categorie' ||
+      (d.source !== 'mysql' && d.sousCategorie && d.sousCategorie !== '-')
+    "
+    class="excel-souscategorie-title"
+  >
+    {{ d.sousCategorie || '-' }}
+  </div>
+</td>
 
               <td>
                 <ng-container *ngIf="d.ligneType !== 'sous_categorie'">

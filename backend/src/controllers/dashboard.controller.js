@@ -18,9 +18,11 @@ const toKey = (value) => String(value ?? '').trim();
 
 const buildMap = (rows, key) => {
   const map = {};
+
   rows.forEach((row) => {
     map[toKey(row[key])] = row;
   });
+
   return map;
 };
 
@@ -30,13 +32,25 @@ const getField = (obj, keys, defaultValue = '') => {
       return obj[key];
     }
   }
+
   return defaultValue;
 };
 
 const average = (arr) => {
   const values = arr.filter((v) => Number.isFinite(v));
-  if (values.length === 0) return 0;
+
+  if (values.length === 0) {
+    return 0;
+  }
+
   return values.reduce((s, v) => s + v, 0) / values.length;
+};
+
+const normalizePhase = (value) => {
+  const phase = String(value || 'phase2').toLowerCase();
+
+  if (phase === 'phase1') return 'phase1';
+  return 'phase2';
 };
 
 exports.getDashboardStats = async (req, res, next) => {
@@ -51,14 +65,21 @@ exports.getDashboardStats = async (req, res, next) => {
     }
 
     const codeProjet = String(req.query.code_projet || 'DI-M3').toUpperCase();
+    const selectedPhase = normalizePhase(req.query.phase || 'phase2');
 
+    /*
+      IMPORTANT :
+      On filtre par phase pour ne pas mélanger phase1 et phase2.
+      Sinon DI-M3 affiche 226 lignes au lieu de 113.
+    */
     const [factRows] = await pool.query(
       `
       SELECT *
       FROM fact_ligne_devis
       WHERE code_projet = ?
+      AND COALESCE(phase, 'phase2') = ?
       `,
-      [codeProjet]
+      [codeProjet, selectedPhase]
     );
 
     const [dimCoutRows] = await pool.query(`
@@ -104,12 +125,37 @@ exports.getDashboardStats = async (req, res, next) => {
       const montantEur = toNumber(fact.montant_eur);
       const pu = toNumber(fact.pu_contrat_exact || fact.pu_contrat_fcfa);
 
+      /*
+        On prend d'abord les valeurs de fact_ligne_devis,
+        car elles correspondent directement à la phase filtrée.
+      */
       const prixRevientTotalEur =
-        toNumber(cout.prix_revient_total_eur) ||
         toNumber(fact.prix_total_eur) ||
+        toNumber(cout.prix_revient_total_eur) ||
         0;
 
-      const coutFgDt = toNumber(cout.cout_fg_dt);
+      const fraisGestionEur = prixRevientTotalEur * 0.05;
+
+      const margeBruteEur =
+        montantEur > 0 ? montantEur - prixRevientTotalEur : 0;
+
+      const margeNetteEur =
+        montantEur > 0 ? margeBruteEur - fraisGestionEur : 0;
+
+      const margeBrutePct =
+        montantEur > 0 ? (margeBruteEur / montantEur) * 100 : null;
+
+      const margeNettePct =
+        montantEur > 0 ? (margeNetteEur / montantEur) * 100 : null;
+
+      const hasValidMargin =
+        margeNettePct !== null && Number.isFinite(margeNettePct);
+
+      const isAnomaly =
+        (hasValidMargin && margeNettePct < 5) ||
+        pu > 10000000;
+
+      const coutFgDt = fraisGestionEur * TAUX_EUR_DT;
 
       const coutFinalDt =
         toNumber(cout.cout_final_dt) ||
@@ -117,56 +163,34 @@ exports.getDashboardStats = async (req, res, next) => {
         toNumber(cout.cout_total_dt) ||
         prixRevientTotalEur * TAUX_EUR_DT;
 
-      const margeBruteEur =
-        toNumber(cout.marge_brute_eur) ||
-        (montantEur > 0 ? montantEur - prixRevientTotalEur : 0);
-
-      const fraisGestionEur =
-        coutFgDt > 0 ? coutFgDt / TAUX_EUR_DT : prixRevientTotalEur * 0.05;
-
-      const margeNetteEur =
-        toNumber(cout.marge_nette_eur) ||
-        (montantEur > 0 ? margeBruteEur - fraisGestionEur : 0);
-
-      const margeBrutePct =
-        toNumber(cout.marge_brute_pct) > 0
-          ? toNumber(cout.marge_brute_pct) * 100
-          : montantEur > 0
-            ? (margeBruteEur / montantEur) * 100
-            : null;
-
-      const margeNettePct =
-        toNumber(cout.marge_nette_pct) !== 0
-          ? toNumber(cout.marge_nette_pct) * 100
-          : montantEur > 0
-            ? (margeNetteEur / montantEur) * 100
-            : null;
-
-      const hasValidMargin = margeNettePct !== null && Number.isFinite(margeNettePct);
-
-      const isAnomaly =
-        (hasValidMargin && margeNettePct < 5) ||
-        pu > 10000000;
-
       return {
         idLigne: fact.id_ligne,
         idCout: fact.id_cout,
         codeProjet,
+        phase: selectedPhase,
+
         section,
         categorie,
         designation,
+
         unite: getField(personnel, ['unite'], '-'),
+
         montantFcfa,
         montantEur,
         pu,
+
         prixRevientTotalEur,
         coutFinalDt,
         coutFgDt,
+
         margeSousTraitantDt: toNumber(cout.marge_sous_traitant_dt),
+
         margeBruteEur,
         margeNetteEur,
+
         margeBrutePct: hasValidMargin ? margeBrutePct : null,
         margeNettePct: hasValidMargin ? margeNettePct : null,
+
         isAnomaly
       };
     });
@@ -178,13 +202,26 @@ exports.getDashboardStats = async (req, res, next) => {
       0
     );
 
-    const lignesAvecMarge = lignes.filter(
-      (d) => d.margeNettePct !== null && Number.isFinite(d.margeNettePct)
+    const montantTotalEur = lignes.reduce(
+      (sum, d) => sum + d.montantEur,
+      0
     );
 
-    const margeNetteMoyenne = average(
-      lignesAvecMarge.map((d) => d.margeNettePct)
+    const margeNetteTotalEurGlobal = lignes.reduce(
+      (sum, d) => sum + d.margeNetteEur,
+      0
     );
+
+    /*
+      Correction importante :
+      La marge moyenne globale ne doit pas être une simple moyenne des lignes.
+      Elle doit être calculée comme Excel :
+      marge nette totale / montant total EUR.
+    */
+    const margeNetteMoyenne =
+      montantTotalEur > 0
+        ? (margeNetteTotalEurGlobal / montantTotalEur) * 100
+        : 0;
 
     const anomalies = lignes.filter((d) => d.isAnomaly);
 
@@ -199,12 +236,16 @@ exports.getDashboardStats = async (req, res, next) => {
         bySection[section] = {
           section,
           montantFcfa: 0,
+          montantEur: 0,
+          margeNetteEur: 0,
           marges: [],
           anomalies: 0
         };
       }
 
       bySection[section].montantFcfa += d.montantFcfa;
+      bySection[section].montantEur += d.montantEur;
+      bySection[section].margeNetteEur += d.margeNetteEur;
 
       if (d.margeNettePct !== null && Number.isFinite(d.margeNettePct)) {
         bySection[section].marges.push(d.margeNettePct);
@@ -221,12 +262,16 @@ exports.getDashboardStats = async (req, res, next) => {
           section,
           categorie,
           montantFcfa: 0,
+          montantEur: 0,
+          margeNetteEur: 0,
           marges: [],
           anomalies: 0
         };
       }
 
       byCategorie[catKey].montantFcfa += d.montantFcfa;
+      byCategorie[catKey].montantEur += d.montantEur;
+      byCategorie[catKey].margeNetteEur += d.margeNetteEur;
 
       if (d.margeNettePct !== null && Number.isFinite(d.margeNettePct)) {
         byCategorie[catKey].marges.push(d.margeNettePct);
@@ -240,7 +285,10 @@ exports.getDashboardStats = async (req, res, next) => {
     const sections = Object.values(bySection).map((item) => ({
       section: item.section,
       montantFcfa: item.montantFcfa,
-      margeMoyenne: average(item.marges),
+      margeMoyenne:
+        item.montantEur > 0
+          ? (item.margeNetteEur / item.montantEur) * 100
+          : average(item.marges),
       anomalies: item.anomalies
     }));
 
@@ -248,7 +296,10 @@ exports.getDashboardStats = async (req, res, next) => {
       section: item.section,
       categorie: item.categorie,
       montantFcfa: item.montantFcfa,
-      margeMoyenne: average(item.marges),
+      margeMoyenne:
+        item.montantEur > 0
+          ? (item.margeNetteEur / item.montantEur) * 100
+          : average(item.marges),
       anomalies: item.anomalies
     }));
 
@@ -297,12 +348,15 @@ exports.getDashboardStats = async (req, res, next) => {
         designation: d.designation,
         categorie: d.categorie,
         section: d.section,
+
         prixRevientTotalEur: d.prixRevientTotalEur,
         coutFgDt: d.coutFgDt,
         margeSousTraitantDt: d.margeSousTraitantDt,
         coutFinalDt: d.coutFinalDt,
+
         margeBruteEur: d.margeBruteEur,
         margeBrutePct: d.margeBrutePct || 0,
+
         margeNetteEur: d.margeNetteEur,
         margeNettePct: d.margeNettePct !== null ? d.margeNettePct / 100 : 0
       }));
@@ -335,13 +389,13 @@ exports.getDashboardStats = async (req, res, next) => {
     );
 
     const margeBrutePctMoyenne =
-      totalCouts > 0
-        ? average(coutsLignes.map((c) => c.margeBrutePct)) / 100
+      montantTotalEur > 0
+        ? margeBruteTotalEur / montantTotalEur
         : 0;
 
     const margeNettePctMoyenne =
-      totalCouts > 0
-        ? average(coutsLignes.map((c) => c.margeNettePct))
+      montantTotalEur > 0
+        ? margeNetteTotalEur / montantTotalEur
         : 0;
 
     const topCouts = [...coutsLignes]
@@ -356,10 +410,12 @@ exports.getDashboardStats = async (req, res, next) => {
     return res.json({
       success: true,
       code_projet: codeProjet,
+      phase: selectedPhase,
       source: 'mysql',
       data: {
         kpis: {
           montantTotalFcfa,
+          montantTotalEur,
           margeNetteMoyenne,
           nombreAnomalies: anomalies.length,
           totalLignes
